@@ -23,11 +23,13 @@ namespace uitest
             };
             var opt = new JsonSerializerOptions();
             opt.Converters.Add(new JsonDateTimeConverter());
+            opt.PropertyNamingPolicy =  JsonNamingPolicy.CamelCase;
+            
 
 
             var val = await cleint.GetFromJsonAsync<ListModel<posts>>("", opt);
 
-            var toshow = JsonSerializer.Serialize(val?.Items);
+            var toshow = JsonSerializer.Serialize(val?.Items,opt);
             richTextBox1.Text = "";
             richTextBox1.Text = toshow.ToString();
 
@@ -36,10 +38,7 @@ namespace uitest
 
         class posts : BaseModel
         {
-            [JsonPropertyName("posts")]
             public string Posts { get; set; } = "";
-
-            [JsonPropertyName("description")]
             public string Description { get; set; } = "";
         }
 
