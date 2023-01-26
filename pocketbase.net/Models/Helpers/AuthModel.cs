@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace pocketbase.net.Models
+namespace pocketbase.net.Models.Helpers
 {
     public class AuthModel : BaseModel
     {
@@ -8,6 +8,6 @@ namespace pocketbase.net.Models
         public bool Verified { get; set; }
         public string EmailVisibility { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
-        public string FileName { get; set; } = string.Empty;
+        public string Avatar { get; set; } = string.Empty;
     }
 }

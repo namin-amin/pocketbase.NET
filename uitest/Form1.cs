@@ -1,5 +1,5 @@
 using pocketbase.net.Helpers;
-using pocketbase.net.Models;
+using pocketbase.net.Models.ResponseHelpers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -27,9 +27,10 @@ namespace uitest
             
 
 
-            var val = await cleint.GetFromJsonAsync<ListModel<posts>>("", opt);
+            var val = await cleint.GetFromJsonAsync<ListModel>("", opt);
+            //var val2 = await cleint.GetFromJsonAsync<ListModel>("", opt);
 
-            var toshow = JsonSerializer.Serialize(val?.Items,opt);
+            var toshow = JsonSerializer.Serialize(val,opt);
             richTextBox1.Text = "";
             richTextBox1.Text = toshow.ToString();
 

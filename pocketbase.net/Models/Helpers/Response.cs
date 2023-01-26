@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.Json.Serialization;
 
-namespace pocketbase.net.Models.ResponseHelpers
+namespace pocketbase.net.Models.Helpers
 {
     public class Response<T>
         where T: class
