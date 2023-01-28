@@ -23,5 +23,6 @@ namespace pocketbase.net.Models.Helpers
         public int TotalItems { get; set; }
         public IEnumerable<IDictionary<string, object>> Items { get; set; } = new List<Dictionary<string, object>>();
     }
+
 }
 
