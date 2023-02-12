@@ -7,12 +7,15 @@ namespace pocketbase.net.Helpers
 {
     public static class PbJsonOptions
     {
-        public static JsonSerializerOptions options = new JsonSerializerOptions() {
+        private static JsonSerializerOptions options = new()
+        {
             Converters =
             {
                new JsonDateTimeConverter()
             },
-            PropertyNamingPolicy= JsonNamingPolicy.CamelCase,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         };
+
+        public static JsonSerializerOptions Options { get => options; private set => options = value; }
     }
 }

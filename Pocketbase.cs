@@ -17,7 +17,7 @@ namespace pocketbase.net
     {
         public HttpClient HttpClient { get; }
 
-        private Dictionary<string, CollectionService> CollectionsList = new Dictionary<string, CollectionService>();
+        private readonly Dictionary<string, CollectionService> CollectionsList = new();
 
         public Pocketbase(string baseurl,
                           string lang,
@@ -34,8 +34,8 @@ namespace pocketbase.net
         public string Baseurl { get; set; }
         public string Lang { get; set; }
         // public BaseAuthStore AuthStore { get; set; }
-    
-    
+
+
         public CollectionService Collections(string collectionname)
         {
             CollectionService? collectionService;
@@ -58,7 +58,7 @@ namespace pocketbase.net
 
             //return services.AddSingleton<Pocketbase>(new Pocketbase(baseUrl,lang));
 
-            return services.AddScoped((options) =>
+            return services.AddSingleton((options) =>
             {
                 return new Pocketbase(baseUrl, lang, httpClient);
             });
@@ -67,7 +67,7 @@ namespace pocketbase.net
         public static IServiceCollection AddPocketbase(this IServiceCollection services, string baseUrl, string lang = "en-US")
         {
 
-            return services.AddScoped((options) =>
+            return services.AddSingleton((options) =>
             {
                 return new Pocketbase(baseUrl, lang, new HttpClient());
             });
