@@ -1,41 +1,55 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Net.Http;
-using System.Runtime.CompilerServices;
-using System.Text.Json;
-using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using pocketbase.net.Helpers;
-using pocketbase.net.Models.Helpers;
 using pocketbase.net.Services;
 using pocketbase.net.Store;
 
 namespace pocketbase.net
 {
+    /// <summary>
+    /// Represents the Cleint 
+    /// </summary>
     public class Pocketbase
     {
-        public HttpClient HttpClient { get; }
+        private HttpClient HttpClient { get; }
 
         private readonly Dictionary<string, CollectionService> CollectionsList = new();
 
+        public BaseAuthService AuthStore { get; set; }
+
+        public string Baseurl { get; set; }
+        public string Lang { get; set; }
+        /// <summary>
+        /// Init Pocketbase Cleint
+        /// </summary>
+        /// <param name="baseurl">represents the baseurl of the Pocketbase server</param>
+        /// <param name="lang">Language Preference</param>
+        /// <param name="httpClient">Provide a HttpCleint to be used if already initialiased else pass null New one will be created</param>
         public Pocketbase(string baseurl,
                           string lang,
                           HttpClient? httpClient)
         {
-            this.HttpClient = httpClient ?? new HttpClient();
+            HttpClient = httpClient ?? new HttpClient();
             Baseurl = baseurl;
-            this.HttpClient.BaseAddress = new Uri(baseurl);
+            HttpClient.BaseAddress = new Uri(baseurl);
             Lang = lang ?? "en-US";
+            AuthStore = new(HttpClient, "admins");
+        }
+
+        void FumSerivce(object? o, EventArgs e)
+        {
+            Console.WriteLine("test");
         }
 
 
-
-        public string Baseurl { get; set; }
-        public string Lang { get; set; }
         // public BaseAuthStore AuthStore { get; set; }
 
-
+        /// <summary>
+        /// Returns the Collection object that can be used to do CRUD and Subscriptions
+        /// </summary>
+        /// <param name="collectionname">Name of the collection to get</param>
+        /// <returns></returns>
         public CollectionService Collections(string collectionname)
         {
             CollectionService? collectionService;
@@ -53,6 +67,14 @@ namespace pocketbase.net
 
     public static class PocketBaseProvider
     {
+        /// <summary>
+        /// Extension method adds a Pocketbase To the Dependency injection services
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="baseUrl">represents the baseurl of the Pocketbase server</param>
+        /// <param name="httpClient">Provide a HttpCleint to be used if already initialiased else pass null New one will be created</param>
+        /// <param name="lang">Language Preference</param>
+        /// <returns></returns>
         public static IServiceCollection AddPocketbase(this IServiceCollection services, string baseUrl, HttpClient? httpClient, string lang = "en-US")
         {
 
@@ -64,6 +86,13 @@ namespace pocketbase.net
             });
         }
 
+
+        /// <summary>
+        /// Extension method adds a Pocketbase To the Dependency injection services
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="baseUrl">represents the baseurl of the Pocketbase server</param>
+        /// <param name="lang">Language Preference</param>
         public static IServiceCollection AddPocketbase(this IServiceCollection services, string baseUrl, string lang = "en-US")
         {
 

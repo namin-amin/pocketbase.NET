@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Text.Json.Serialization;
+﻿using System.Collections.Generic;
 
 namespace pocketbase.net.Models.Helpers
 {
-    public class ListModel<T>
+    public class Record<T>
         where T : PbBaseModel
     {
         public int Page { get; set; }
@@ -15,7 +12,7 @@ namespace pocketbase.net.Models.Helpers
         public IEnumerable<T> Items { get; set; } = new List<T>();
     }
 
-    public class ListModel
+    public class Record
     {
         public int Page { get; set; }
         public int PerPage { get; set; }

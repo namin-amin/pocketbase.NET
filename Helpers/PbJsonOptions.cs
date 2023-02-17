@@ -5,6 +5,9 @@ using System.Text.Json;
 
 namespace pocketbase.net.Helpers
 {
+    /// <summary>
+    /// Json options used in Pocketbase communicated json
+    /// </summary>
     public static class PbJsonOptions
     {
         private static JsonSerializerOptions options = new()
