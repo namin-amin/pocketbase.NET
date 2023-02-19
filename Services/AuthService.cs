@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using pocketbase.net.Helpers;
@@ -12,7 +9,7 @@ using pocketbase.net.Models.Helpers;
 
 namespace pocketbase.net.Services
 {
-    public class BaseAuthService : BaseService
+    public class BaseAuthService<T> : BaseService
     {
         public event EventHandler? Onchange;
         private string _token = "";
@@ -21,12 +18,12 @@ namespace pocketbase.net.Services
         {
         }
 
-        public bool IsValid
+        public bool isValid
         {
             get; private set;
         }
 
-        public string Token
+        public string token
         {
             get { return _token; }
         }
@@ -35,7 +32,7 @@ namespace pocketbase.net.Services
         public void Clear(Action<object, EventArgs>? callback = null)
         {
             _token = "";
-            IsValid = false;
+            isValid = false;
             //?How to format the eventargs?
             callback?.Invoke(this, new EventArgs());
             Onchange?.Invoke(this, new EventArgs());
@@ -66,7 +63,7 @@ namespace pocketbase.net.Services
                 {
                     try
                     {
-                        return JsonSerializer.Deserialize<AdminAuthModel>(thing.ToString() ?? "", PbJsonOptions.Options)!;
+                        return JsonSerializer.Deserialize<AdminAuthModel>(thing.ToString() ?? "", PbJsonOptions.options)!;
                     }
                     catch (Exception ex)
                     {
@@ -80,6 +77,37 @@ namespace pocketbase.net.Services
             return new();
         }
 
+        public async Task<AdminAuthModel> Refresh()
+        {
+            var data = await _httpClient.PostAsJsonAsync("admins", new
+            {
+                Authorization = _token
+            });
+
+
+            if (data.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                return await data.Content.ReadFromJsonAsync<AdminAuthModel>(PbJsonOptions.options) ?? new();
+            }
+            return new();
+        }
+
+        public async Task<AdminRecord> GetFullList()
+        {
+            return JsonSerializer.Deserialize<AdminRecord>(await base.GetFullList()) ?? new();
+        }
+
+        public async Task<AdminAuthModel> GetOne(string id)
+        {
+            var result = await GetFullList(id);
+            return JsonSerializer.Deserialize<AdminAuthModel>(result, PbJsonOptions.options)!;
+        }
+
+
+        public async Task<AdminAuthModel> Update(dynamic data, string id)
+        {
+            return await Update<AdminAuthModel, dynamic>(data, id);
+        }
 
 
         public async Task<AdminAuthModel?> Create(
@@ -102,12 +130,43 @@ namespace pocketbase.net.Services
 
             if (data.StatusCode == System.Net.HttpStatusCode.OK)
             {
-                return await data.Content.ReadFromJsonAsync<AdminAuthModel>(PbJsonOptions.Options) ?? new();
+                return await data.Content.ReadFromJsonAsync<AdminAuthModel>(PbJsonOptions.options) ?? new();
             }
             return new();
 
         }
 
+        public async Task<bool> RequestPasswordReset(string email)
+        {
+            var data = await _httpClient.PostAsJsonAsync("admins/request-password-reset", new
+            {
+                email,
+                Authorization = _token
+            });
+
+            if (data.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public async Task<bool> ConfirmPasswordReset(string email, string password, string passwordConfirm)
+        {
+            var data = await _httpClient.PostAsJsonAsync("admins/confirm-password-reset", new
+            {
+                email,
+                password,
+                passwordConfirm,
+                Authorization = _token
+            });
+
+            if (data.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                return true;
+            }
+            return false;
+        }
 
     }
 }

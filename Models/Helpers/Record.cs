@@ -2,24 +2,29 @@
 
 namespace pocketbase.net.Models.Helpers
 {
-    public class Record<T>
+    public class Record<T> : BaseRecord
         where T : PbBaseModel
     {
-        public int Page { get; set; }
-        public int PerPage { get; set; }
-        public int TotalPages { get; set; }
-        public int TotalItems { get; set; }
-        public IEnumerable<T> Items { get; set; } = new List<T>();
+        public int totalPages { get; set; }
+
+        public IEnumerable<T> items { get; set; } = new List<T>();
     }
 
-    public class Record
+    public class Record : BaseRecord
     {
-        public int Page { get; set; }
-        public int PerPage { get; set; }
-        public int TotalPages { get; set; }
-        public int TotalItems { get; set; }
-        public IEnumerable<IDictionary<string, object>> Items { get; set; } = new List<Dictionary<string, object>>();
+        public int totalPages { get; set; }
+        public IEnumerable<IDictionary<string, object>> items { get; set; } = new List<Dictionary<string, object>>();
     }
 
+    public class AdminRecord : BaseRecord
+    {
+        public IEnumerable<AdminAuthModel> items { get; set; } = new List<AdminAuthModel>();
+    }
+    public abstract class BaseRecord
+    {
+        public int page { get; set; }
+        public int perPage { get; set; }
+        public int totalItems { get; set; }
+    }
 }
 

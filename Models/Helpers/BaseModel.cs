@@ -7,8 +7,8 @@ namespace pocketbase.net.Models.Helpers
 {
     public abstract class BaseModel
     {
-        public string Id { get; set; } = string.Empty;
-        public DateTime Created { get; set; }
-        public DateTime Updated { get; set; }
+        public string id { get; set; } = string.Empty;
+        public DateTime created { get; set; }
+        public DateTime updated { get; set; }
     }
 }

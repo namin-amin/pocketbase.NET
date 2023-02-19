@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using pocketbase.net.Helpers;
+using pocketbase.net.Models;
 using pocketbase.net.Models.Helpers;
 
 namespace pocketbase.net.Services
@@ -13,42 +14,30 @@ namespace pocketbase.net.Services
     public class CollectionService : BaseService
     {
 
-        public CollectionService(HttpClient _httpClient, string collectionName) : base(_httpClient, collectionName)
+        internal readonly RealtimeService realtimeService;
+        internal CollectionService(HttpClient _httpClient,
+            string collectionName,
+            RealtimeService realtimeService) : base(_httpClient, collectionName)
         {
+            this.realtimeService = realtimeService;
         }
 
         /// <summary>
-        /// Gets Record response from PoccketBase
+        /// subscribe to the realtime events of the server
         /// </summary>
-        /// <typeparam name="T">collection objects Type</typeparam>
-        /// <returns></returns>
-        public async Task<Record<T>> GetFullList<T>() where T : PbBaseModel
+        /// <param name="topic">topic representing colection</param>
+        /// <param name="callbackFun">Action to be called when there is alterations in the given topic collection</param>
+        public void Subscribe(string topic, System.Action<RealtimeEventArgs> callbackFun)
         {
-            var result = await GetFullList();
-            return JsonSerializer.Deserialize<Record<T>>(result, PbJsonOptions.Options) ?? new Record<T>();
+            realtimeService.Subscribe(topic, callbackFun);
         }
 
         /// <summary>
-        /// Gets Record response from PoccketBase
+        /// Unsubscribe from the current collection
         /// </summary>
-        /// <param name="id">Records id which to be got</param>
-        /// <returns></returns>
-        public async Task<IDictionary<string, object>> GetOne(string id)
+        public void UnSubscribe(string topic)
         {
-            var result = await GetFullList(id);
-            return JsonSerializer.Deserialize<IDictionary<string, object>>(result, PbJsonOptions.Options)!;
-        }
-
-        /// <summary>
-        /// Gets Record response from PoccketBase
-        /// </summary>
-        /// <param name="id">Records id which to be got</param>
-        /// <typeparam name="T">collection objects Type</typeparam>
-        /// <returns></returns>
-        public async Task<T> GetOne<T>(string id)
-        {
-            var result = await GetFullList(id);
-            return JsonSerializer.Deserialize<T>(result, PbJsonOptions.Options)!;
+            realtimeService.UnSubscribe(topic);
         }
 
     }

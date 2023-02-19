@@ -11,9 +11,16 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
     <PackageReference Include="System.Text.Json" Version="7.0.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <EditorConfigFiles Remove="D:\Projects\Pb\pocketbase.net\.editorconfig" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="D:\Projects\Pb\pocketbase.net\.editorconfig" />
   </ItemGroup>
 
 </Project>

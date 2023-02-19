@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
 using pocketbase.net.Helpers;
-using pocketbase.net.Models;
+using pocketbase.net.Models.Helpers;
+using pocketbase.net.Services.Helpers;
 
 namespace pocketbase.net.Services
 {
@@ -18,7 +20,7 @@ namespace pocketbase.net.Services
         public readonly string collectionName;
 
         private readonly UrlBuilder urlBuilder;
-        private readonly RealtimeService realtimeService;
+
 
         public BaseService(HttpClient httpClient,
                            string collectionName)
@@ -26,7 +28,6 @@ namespace pocketbase.net.Services
             this.collectionName = collectionName;
             _httpClient = httpClient;
             urlBuilder = new UrlBuilder(collectionName);
-            realtimeService = new RealtimeService(_httpClient.BaseAddress?.ToString() ?? "", httpClient);
         }
 
         /// <summary>
@@ -43,6 +44,89 @@ namespace pocketbase.net.Services
         }
 
         /// <summary>
+        /// Gets Record response from PoccketBase
+        /// </summary>
+        /// <typeparam name="T">collection objects Type</typeparam>
+        /// <returns></returns>
+        public async Task<Record<T>> GetFullList<T>() where T : PbBaseModel
+        {
+            var result = await GetFullList();
+            return JsonSerializer.Deserialize<Record<T>>(result, PbJsonOptions.options) ?? new Record<T>();
+        }
+
+
+        public async Task<string> GetList(int Page,
+            int PerPage,
+            ListQueryParams? queryParams = null)
+        {
+            // queryParams ??= new();
+            // queryParams.page = Page;
+            // queryParams.perPage = PerPage;
+
+
+            var url = urlBuilder.CollectionUrl(queryParams: queryParams);
+
+            var tt = new Dictionary<Filey, string>();
+
+            tt.Add(Filey.Filter, "ttttttt");
+
+            var yy = tt.ToDictionary(ch => ch.Key.ToString(), ch => ch.Value);
+
+            Console.WriteLine(Filey.Filter.ToString());
+            /////ToDictionary(
+            //p => p.Name,
+            //           p => p.GetValue(queryParams)?.ToString() ?? "").
+
+
+            //var content = new HttpRequestMessage(HttpMethod.Get, _httpClient.BaseAddress.ToString() + urlBuilder.CollectionUrl())
+            //{
+            //    //  Content = new StringContent(JsonSerializer.Serialize(queryParams)),
+
+            //};
+
+            //var result = await _httpClient.SendAsync(content);
+
+            //return await result.Content.ReadAsStringAsync();
+
+            ////    var result = _httpClient.GetFromJsonAsync(
+            //         _httpClient.BaseAddress.ToString() + urlBuilder.CollectionUrl()
+
+
+
+            //        );
+            var t = await _httpClient!.GetAsync(url);
+            var top = await t.Content.ReadAsStringAsync();
+            Console.WriteLine(top);
+            return "";
+            //var tt = new Query
+
+
+        }
+
+        /// <summary>
+        /// Gets Record response from PoccketBase
+        /// </summary>
+        /// <param name="id">Records id which to be got</param>
+        /// <returns></returns>
+        public async Task<IDictionary<string, object>> GetOne(string id)
+        {
+            var result = await GetFullList(id);
+            return JsonSerializer.Deserialize<IDictionary<string, object>>(result, PbJsonOptions.options)!;
+        }
+
+        /// <summary>
+        /// Gets Record response from PoccketBase
+        /// </summary>
+        /// <param name="id">Records id which to be got</param>
+        /// <typeparam name="T">collection objects Type</typeparam>
+        /// <returns></returns>
+        public async Task<T> GetOne<T>(string id)
+        {
+            var result = await GetFullList(id);
+            return JsonSerializer.Deserialize<T>(result, PbJsonOptions.options)!;
+        }
+
+        /// <summary>
         /// Create new Record in the collection
         /// </summary>
         /// <param name="data">Data to be inserted</param>
@@ -50,7 +134,7 @@ namespace pocketbase.net.Services
         public async Task<IDictionary<string, object>> Create(IDictionary<string, object> data)
         {
             var response = await _httpClient.PostAsJsonAsync(urlBuilder.CollectionUrl(), data);
-            return (await response.Content.ReadFromJsonAsync<IDictionary<string, object>>(PbJsonOptions.Options))!;
+            return (await response.Content.ReadFromJsonAsync<IDictionary<string, object>>(PbJsonOptions.options))!;
         }
 
         /// <summary>
@@ -63,7 +147,7 @@ namespace pocketbase.net.Services
         public async Task<T> Create<T, D>(D data)
         {
             var response = await _httpClient.PostAsJsonAsync(urlBuilder.CollectionUrl(), data);
-            return (await response.Content!.ReadFromJsonAsync<T>(PbJsonOptions.Options))!;
+            return (await response.Content!.ReadFromJsonAsync<T>(PbJsonOptions.options))!;
         }
 
         /// <summary>
@@ -80,7 +164,7 @@ namespace pocketbase.net.Services
 
                 new StringContent(JsonSerializer.Serialize(data), System.Text.Encoding.UTF8, "application/json")
             );
-            return (await response.Content.ReadFromJsonAsync<T>(PbJsonOptions.Options))!;
+            return (await response.Content.ReadFromJsonAsync<T>(PbJsonOptions.options))!;
         }
         /// <summary>
         /// Delete Record
@@ -91,22 +175,6 @@ namespace pocketbase.net.Services
         {
             await _httpClient.DeleteAsync(urlBuilder.CollectionUrl(id));
         }
-        /// <summary>
-        /// subscribe to the realtime events of the server
-        /// </summary>
-        /// <param name="topic">topic representing colection</param>
-        /// <param name="callbackFun">Action to be called when there is alterations in the given topic collection</param>
-        public void Subscribe(string topic, Action<RealtimeEventArgs> callbackFun)
-        {
-            realtimeService.Subscribe(topic, callbackFun);
-        }
 
-        /// <summary>
-        /// Unsubscribe from the current collection
-        /// </summary>
-        public void UnSubscribe(string topic)
-        {
-            realtimeService.UnSubscribe(topic);
-        }
     }
 }

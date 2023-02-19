@@ -8,14 +8,14 @@ namespace pocketbase.net.Models.Helpers
 
     public abstract class BaseErrorResponse
     {
-        public int Code { get; set; }
-        public string Message { get; set; } = string.Empty;
+        public int code { get; set; }
+        public string message { get; set; } = string.Empty;
     }
 
     public class Response<T> : BaseErrorResponse
         where T : class, new()
     {
-        public T? Data { get; set; } = new();
+        public T? data { get; set; } = new();
     }
 
     public class Email : BaseErrorResponse

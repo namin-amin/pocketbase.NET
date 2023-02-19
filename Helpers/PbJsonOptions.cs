@@ -10,7 +10,7 @@ namespace pocketbase.net.Helpers
     /// </summary>
     public static class PbJsonOptions
     {
-        private static JsonSerializerOptions options = new()
+        private static JsonSerializerOptions Options = new()
         {
             Converters =
             {
@@ -19,6 +19,6 @@ namespace pocketbase.net.Helpers
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         };
 
-        public static JsonSerializerOptions Options { get => options; private set => options = value; }
+        public static JsonSerializerOptions options { get => Options; private set => Options = value; }
     }
 }

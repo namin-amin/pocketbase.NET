@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net.Http;
 using Microsoft.Extensions.DependencyInjection;
+using pocketbase.net.Models.Helpers;
 using pocketbase.net.Services;
 using pocketbase.net.Store;
 
@@ -12,14 +13,16 @@ namespace pocketbase.net
     /// </summary>
     public class Pocketbase
     {
-        private HttpClient HttpClient { get; }
+        private HttpClient httpClient { get; }
 
         private readonly Dictionary<string, CollectionService> CollectionsList = new();
 
-        public BaseAuthService AuthStore { get; set; }
+        public BaseAuthService<AdminAuthModel> authStore { get; set; }
 
-        public string Baseurl { get; set; }
-        public string Lang { get; set; }
+        private RealtimeService realtimeService { get; set; }
+
+        public string baseurl { get; set; }
+        public string lang { get; set; }
         /// <summary>
         /// Init Pocketbase Cleint
         /// </summary>
@@ -30,11 +33,12 @@ namespace pocketbase.net
                           string lang,
                           HttpClient? httpClient)
         {
-            HttpClient = httpClient ?? new HttpClient();
-            Baseurl = baseurl;
-            HttpClient.BaseAddress = new Uri(baseurl);
-            Lang = lang ?? "en-US";
-            AuthStore = new(HttpClient, "admins");
+            this.httpClient = httpClient ?? new HttpClient();
+            this.baseurl = baseurl;
+            this.httpClient.BaseAddress = new Uri(baseurl);
+            this.lang = lang ?? "en-US";
+            realtimeService = new RealtimeService(baseurl, this.httpClient);
+            authStore = new(this.httpClient, "admins");
         }
 
         void FumSerivce(object? o, EventArgs e)
@@ -59,10 +63,12 @@ namespace pocketbase.net
                 return collectionService;
             }
 
-            collectionService = new CollectionService(HttpClient, collectionname);
+            collectionService = new CollectionService(httpClient, collectionname, realtimeService);
             CollectionsList.Add(collectionname, collectionService);
             return collectionService;
         }
+
+
     }
 
     public static class PocketBaseProvider
