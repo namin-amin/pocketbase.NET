@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -9,7 +8,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.AspNetCore.Components.WebAssembly.Http;
 using pocketbase.net.Models;
 
@@ -20,7 +18,7 @@ namespace pocketbase.net.Services
 
 
         private readonly Dictionary<string, List<Action<RealtimeEventArgs>>> subscriptions = new();
-        public string BaseUrl { get; }
+        public string baseUrl { get; }
         private readonly HttpClient _httpcleint;
         private bool cancelled;
         private string _cleintId = "";
@@ -28,7 +26,7 @@ namespace pocketbase.net.Services
         public RealtimeService(string baseUrl, HttpClient _httpcleint)
         {
             this._httpcleint = _httpcleint;
-            BaseUrl = baseUrl;
+            this.baseUrl = baseUrl;
 
         }
 
@@ -116,7 +114,7 @@ namespace pocketbase.net.Services
             using var client = new HttpClient();
             var request = new HttpRequestMessage(HttpMethod.Get, "stream")
             {
-                RequestUri = new Uri(BaseUrl + "realtime")
+                RequestUri = new Uri(baseUrl + "realtime")
             };
 
             request.SetBrowserResponseStreamingEnabled(true);
@@ -126,7 +124,7 @@ namespace pocketbase.net.Services
 
             Stream? stream = null;
             byte[] bytes = new byte[1];
-            var newlineChar = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "\n" :Environment.NewLine;
+            var newlineChar = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "\n" : Environment.NewLine;
 
             while (!cancelled)
             {
@@ -139,7 +137,7 @@ namespace pocketbase.net.Services
                         await stream.ReadAsync(bytes);
                         string? letter = Encoding.UTF8.GetString(bytes);
                         _responseContent += letter;
-                   
+
 
                         if (letter == newlineChar && prevNewLine == true)
                         {
@@ -201,9 +199,9 @@ namespace pocketbase.net.Services
 
             var args = new RealtimeEventArgs()
             {
-                Id = _cleintId,
+                id = _cleintId,
                 Event = _event,
-                Data = JsonSerializer.Deserialize<Dictionary<string, object>>(Data) ?? new()
+                data = JsonSerializer.Deserialize<Dictionary<string, object>>(Data) ?? new()
             };
 
             if (!string.IsNullOrWhiteSpace(_event) && _event == "PB_CONNECT")
@@ -227,7 +225,7 @@ namespace pocketbase.net.Services
         /// <returns></returns>
         async void AddRemoveTopics()
         {
-            await _httpcleint.PostAsJsonAsync(BaseUrl + "realtime", new
+            await _httpcleint.PostAsJsonAsync(baseUrl + "realtime", new
             {
                 clientId = _cleintId,
                 subscriptions = subscriptions.Keys.ToArray()
