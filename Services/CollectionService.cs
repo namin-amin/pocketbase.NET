@@ -1,9 +1,4 @@
-using System.Collections.Generic;
 using System.Net.Http;
-using System.Text.Json;
-using System.Threading.Tasks;
-using pocketbase.net.Helpers;
-using pocketbase.net.Models;
 using pocketbase.net.Models.Helpers;
 
 namespace pocketbase.net.Services
@@ -22,23 +17,6 @@ namespace pocketbase.net.Services
             this.realtimeService = realtimeService;
         }
 
-        /// <summary>
-        /// subscribe to the realtime events of the server
-        /// </summary>
-        /// <param name="topic">topic representing colection</param>
-        /// <param name="callbackFun">Action to be called when there is alterations in the given topic collection</param>
-        public void Subscribe(string topic, System.Action<RealtimeEventArgs> callbackFun)
-        {
-            realtimeService.Subscribe(topic, callbackFun);
-        }
-
-        /// <summary>
-        /// Unsubscribe from the current collection
-        /// </summary>
-        public void UnSubscribe(string topic)
-        {
-            realtimeService.UnSubscribe(topic);
-        }
 
     }
 

@@ -30,18 +30,21 @@ namespace pocketbase.net.Helpers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public string CollectionUrl(string id = "", object? queryParams = null)
+        public string CollectionUrl(string id = "", IDictionary<string, string>? queryParams = null)
         {
             var baseUrl = collectionType + collectionName.ToLower() + recordType + id;
             return QueryBuilder(queryParams, baseUrl);
         }
+        // public string CollectionUrl(string id = "")
+        // {
+        //     return collectionType + collectionName.ToLower() + recordType + id;
+        // }
 
-        private string QueryBuilder(object? queryParams, string baseUrl)
+        private static string QueryBuilder(IDictionary<string, string>? queryParams, string baseUrl)
         {
             if (queryParams is null) return baseUrl;
 
-            //TODO quick patch for now later change it not use this log
-            var queryDict = JsonSerializer.Deserialize<Dictionary<string, object>>(JsonSerializer.Serialize(queryParams, PbJsonOptions.options), PbJsonOptions.options)
+            var queryDict = queryParams
                 ?.Where(
                     c =>
                     {
@@ -54,11 +57,13 @@ namespace pocketbase.net.Helpers
                         }
                         return false;
                     }
-                ).ToDictionary(s => s.Key, s => s.Value.ToString()) ?? new();
+                ).ToDictionary(s => s.Key.ToString(), s => s.Value.ToString()) ?? new();
 
             return QueryHelpers.AddQueryString(baseUrl[^2..] == "/" ? baseUrl : baseUrl[..^1], queryDict);
 
         }
+
+
 
     }
 }

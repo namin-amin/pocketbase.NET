@@ -12,7 +12,7 @@ namespace pocketbase.net.Models.Helpers
         public bool system { get; set; }
         public bool required { get; set; }
         public bool unique { get; set; }
-        public IDictionary<string, object> options { get; set; } = new Dictionary<string, object>();
+        public IDictionary<string, dynamic> options { get; set; } = new Dictionary<string, dynamic>();
 
     }
 }

@@ -97,10 +97,9 @@ namespace pocketbase.net.Services
             return JsonSerializer.Deserialize<AdminRecord>(await base.GetFullList()) ?? new();
         }
 
-        public async Task<AdminAuthModel> GetOne(string id)
+        public new async Task<AdminAuthModel> GetOne(string id, string expand)
         {
-            var result = await GetFullList(id);
-            return JsonSerializer.Deserialize<AdminAuthModel>(result, PbJsonOptions.options)!;
+            return await GetOne<AdminAuthModel>(id, expand);
         }
 
 

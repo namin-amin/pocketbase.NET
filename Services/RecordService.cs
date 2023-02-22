@@ -1,24 +1,40 @@
-using System.Data;
+using System;
 using System.Net.Http;
-using System.Threading.Tasks;
-using pocketbase.net.Models.Helpers;
+using pocketbase.net.Models;
 
 namespace pocketbase.net.Services
 {
-    internal class RecordService : BaseService
+    public class RecordService : BaseService
     {
         internal RealtimeService realtimeService { get; }
-        public RecordService(
-            HttpClient _httpClient,
-            string collectionName,
-            RealtimeService realtimeService
-        ) : base(_httpClient, collectionName)
+        internal RecordService(
+           HttpClient _httpClient,
+           string collectionName,
+           RealtimeService realtimeService
+       ) : base(_httpClient, collectionName)
         {
             this.realtimeService = realtimeService;
         }
 
 
-        //public Task<Record>()
+
+        /// <summary>
+        /// subscribe to the realtime events of the server
+        /// </summary>
+        /// <param name="topic">topic representing colection</param>
+        /// <param name="callbackFun">Action to be called when there is alterations in the given topic collection</param>
+        public void Subscribe(string topic, Action<RealtimeEventArgs> callbackFun)
+        {
+            realtimeService.Subscribe(topic, callbackFun);
+        }
+
+        /// <summary>
+        /// Unsubscribe from the current collection
+        /// </summary>
+        public void UnSubscribe(string topic)
+        {
+            realtimeService.UnSubscribe(topic);
+        }
 
     }
 }

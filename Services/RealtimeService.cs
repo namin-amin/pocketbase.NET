@@ -52,7 +52,7 @@ namespace pocketbase.net.Services
                 Dowork();
 
             }
-            else if (subscriptions.TryGetValue(topic, out List<Action<RealtimeEventArgs>> value))
+            else if (subscriptions.TryGetValue(topic, out List<Action<RealtimeEventArgs>>? value))
             {
                 value.Add(callback); //Add new callback to existing topic
             }

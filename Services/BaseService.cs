@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -14,7 +13,7 @@ namespace pocketbase.net.Services
     /// <summary>
     /// Base Service class defines all the basic operatins that a Service class shud be doing
     /// </summary>
-    public abstract class BaseService
+    public abstract class BaseService<M>
     {
         public readonly HttpClient _httpClient;
         public readonly string collectionName;
@@ -36,10 +35,20 @@ namespace pocketbase.net.Services
         /// <param name="collectionName">name of the collection to be queried</param>
         /// <param name="id">If getting single record then required  id</param>
         /// <returns>Response schema based on the type of response</returns>
-        public async Task<string> GetFullList(string id = "")
+        public async Task<string> GetFullList(string id = "", RecordListQueryParams? queryParams = null)
         {
+            queryParams ??= new();
+            var qParams = new
+            Dictionary<string, string>()
+            {
+                {"page",queryParams.page.ToString()},
+                {"perPage",queryParams.perPage.ToString()},
+                {"sort",queryParams.sort},
+                {"filter",queryParams.filter},
+                {"expand",queryParams.expand}
+            };
 
-            var httpresult = await _httpClient!.GetAsync(urlBuilder.CollectionUrl(id));
+            var httpresult = await _httpClient!.GetAsync(urlBuilder.CollectionUrl(id, qParams));
             return await httpresult.Content.ReadAsStringAsync();
         }
 
@@ -48,69 +57,85 @@ namespace pocketbase.net.Services
         /// </summary>
         /// <typeparam name="T">collection objects Type</typeparam>
         /// <returns></returns>
-        public async Task<Record<T>> GetFullList<T>() where T : PbBaseModel
+        public async Task<Record<T>> GetFullList<T>(RecordListQueryParams? queryParams = null) where T : PbBaseModel
         {
-            var result = await GetFullList();
+            var result = await GetFullList("", queryParams);
             return JsonSerializer.Deserialize<Record<T>>(result, PbJsonOptions.options) ?? new Record<T>();
         }
 
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="Page"></param>
+        /// <param name="PerPage"></param>
+        /// <param name="queryParams"></param>
+        /// <returns></returns>
         public async Task<string> GetList(int Page,
             int PerPage,
-            ListQueryParams? queryParams = null)
+           ListQueryParams? queryParams = null)
         {
-            // queryParams ??= new();
-            // queryParams.page = Page;
-            // queryParams.perPage = PerPage;
+            queryParams ??= new();
+            var qParams = new
+             Dictionary<string, string>()
+            {
+                {"page",Page.ToString()},
+                {"perPage",PerPage.ToString()},
+                {"sort",queryParams.sort},
+                {"filter",queryParams.filter}
+            };
 
+            string? list;
+            try
+            {
+                var t = await _httpClient!.GetAsync(urlBuilder.CollectionUrl(queryParams: qParams));
+                list = await t.Content.ReadAsStringAsync();
+            }
+            catch (Exception ex)
+            {
 
-            var url = urlBuilder.CollectionUrl(queryParams: queryParams);
-
-            var tt = new Dictionary<Filey, string>();
-
-            tt.Add(Filey.Filter, "ttttttt");
-
-            var yy = tt.ToDictionary(ch => ch.Key.ToString(), ch => ch.Value);
-
-            Console.WriteLine(Filey.Filter.ToString());
-            /////ToDictionary(
-            //p => p.Name,
-            //           p => p.GetValue(queryParams)?.ToString() ?? "").
-
-
-            //var content = new HttpRequestMessage(HttpMethod.Get, _httpClient.BaseAddress.ToString() + urlBuilder.CollectionUrl())
-            //{
-            //    //  Content = new StringContent(JsonSerializer.Serialize(queryParams)),
-
-            //};
-
-            //var result = await _httpClient.SendAsync(content);
-
-            //return await result.Content.ReadAsStringAsync();
-
-            ////    var result = _httpClient.GetFromJsonAsync(
-            //         _httpClient.BaseAddress.ToString() + urlBuilder.CollectionUrl()
-
-
-
-            //        );
-            var t = await _httpClient!.GetAsync(url);
-            var top = await t.Content.ReadAsStringAsync();
-            Console.WriteLine(top);
-            return "";
-            //var tt = new Query
-
-
+                Console.WriteLine(ex.Message);
+                throw;
+            }
+            return list;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="Page"></param>
+        /// <param name="PerPage"></param>
+        /// <param name="queryParams"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public async Task<Record<T>?> GetList<T>(int Page,
+           int PerPage,
+        ListQueryParams? queryParams = null) where T : PbBaseModel
+        {
+
+            try
+            {
+                return JsonSerializer.Deserialize<Record<T>>(await GetList(Page, PerPage, queryParams)) ?? null;
+            }
+            catch (Exception ex)
+            {
+
+                Console.WriteLine(ex.Message);
+                throw;
+            }
+        }
+
 
         /// <summary>
         /// Gets Record response from PoccketBase
         /// </summary>
         /// <param name="id">Records id which to be got</param>
         /// <returns></returns>
-        public async Task<IDictionary<string, object>> GetOne(string id)
+        public async Task<IDictionary<string, object>> GetOne(string id, string expand = "")
         {
-            var result = await GetFullList(id);
+            var result = await GetFullList(id, new()
+            {
+                expand = expand
+            });
             return JsonSerializer.Deserialize<IDictionary<string, object>>(result, PbJsonOptions.options)!;
         }
 
@@ -120,9 +145,12 @@ namespace pocketbase.net.Services
         /// <param name="id">Records id which to be got</param>
         /// <typeparam name="T">collection objects Type</typeparam>
         /// <returns></returns>
-        public async Task<T> GetOne<T>(string id)
+        public async Task<T> GetOne<T>(string id, string expand = "")
         {
-            var result = await GetFullList(id);
+            var result = await GetFullList(id, new()
+            {
+                expand = expand
+            });
             return JsonSerializer.Deserialize<T>(result, PbJsonOptions.options)!;
         }
 

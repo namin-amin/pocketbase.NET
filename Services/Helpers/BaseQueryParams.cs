@@ -1,16 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace pocketbase.net.Services.Helpers
 {
-    public enum ListQueryParams
+    public class ListQueryParams
     {
-        page,
-        perPage,
-        sort,
-        filter
+        public int page = 0;
+        public int perPage = 0;
+        public string sort = string.Empty;
+        public string filter = string.Empty;
     }
 
     //check if required can use starightup things
@@ -19,13 +14,13 @@ namespace pocketbase.net.Services.Helpers
         public string expand { get; set; } = string.Empty;
     }
 
-    public enum RecordListQueryParams
+    public class RecordListQueryParams
     {
-        page,
-        perPage,
-        sort,
-        filter,
-        expand
+        public int page = 0;
+        public int perPage = 0;
+        public string sort = string.Empty;
+        public string filter = string.Empty;
+        public string expand = string.Empty;
     }
 
     public class LogStatsQueryParams
@@ -38,10 +33,4 @@ namespace pocketbase.net.Services.Helpers
         public string thumb { get; set; } = string.Empty;
     }
 
-    public enum Filey
-    {
-        Filter,
-        Sort,
-        Thumb
-    }
 }
