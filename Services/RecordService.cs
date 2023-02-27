@@ -1,6 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
+using System.Net.Http.Json;
+using System.Threading.Tasks;
+using pocketbase.net.Helpers;
 using pocketbase.net.Models;
+using pocketbase.net.Models.Helpers;
+using static System.Text.Json.JsonSerializer;
 
 namespace pocketbase.net.Services
 {
@@ -10,8 +16,9 @@ namespace pocketbase.net.Services
         internal RecordService(
            HttpClient _httpClient,
            string collectionName,
-           RealtimeService realtimeService
-       ) : base(_httpClient, collectionName)
+           RealtimeService realtimeService,
+           Pocketbase cleint
+       ) : base(_httpClient, collectionName, cleint)
         {
             this.realtimeService = realtimeService;
         }
@@ -36,5 +43,47 @@ namespace pocketbase.net.Services
             realtimeService.UnSubscribe(topic);
         }
 
+        public async Task<string> ListAuthMethods()
+        {
+            return await _httpClient.GetStringAsync($"api/collections/{collectionName}/auth-methods");
+        }
+
+        public async Task<AdminAuthModel> AuthWithPassword(
+           string email,
+           string password
+       )
+        {
+            var response = await _httpClient.PostAsJsonAsync(collectionName + "/auth-with-password", new
+            {
+                identity = email,
+                password
+            });
+
+            var data = await
+                        response.Content.ReadFromJsonAsync<IDictionary<string, object>>()
+                        ??
+                        new Dictionary<string, object>();
+
+
+            if (data.TryGetValue("token", out object? value))
+            {
+                cleint.authStore._token = value?.ToString()!;
+                if (data.TryGetValue("admin", out object? thing))
+                {
+                    try
+                    {
+                        return Deserialize<AdminAuthModel>(thing.ToString() ?? "", PbJsonOptions.options)!;
+                    }
+                    catch (Exception ex)
+                    {
+
+                        Console.WriteLine(ex.Message);
+                    }
+                }
+                return new();
+            }
+
+            return new();
+        }
     }
 }

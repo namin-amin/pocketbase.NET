@@ -8,7 +8,7 @@ namespace pocketbase.net.Models
     public class RealtimeEventArgs
     {
         public string id { get; set; } = string.Empty;
-        public string Event { get; set; } = string.Empty;//this rule violation not fixed as it conflicts with event keyword
+        public string @event { get; set; } = string.Empty;//this rule violation not fixed as it conflicts with event keyword
         public Dictionary<string, object> data { get; set; } = new();
     }
 

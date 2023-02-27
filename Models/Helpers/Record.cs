@@ -10,6 +10,14 @@ namespace pocketbase.net.Models.Helpers
         public IEnumerable<T> items { get; set; } = new List<T>();
     }
 
+    public class ColRecord<T> : BaseRecord
+        where T : BaseModel
+    {
+        public int totalPages { get; set; }
+
+        public IEnumerable<T> items { get; set; } = new List<T>();
+    }
+
     public class Record : BaseRecord
     {
         public int totalPages { get; set; }

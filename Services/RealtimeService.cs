@@ -6,10 +6,10 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components.WebAssembly.Http;
 using pocketbase.net.Models;
+using static System.Text.Json.JsonSerializer;
 
 namespace pocketbase.net.Services
 {
@@ -18,7 +18,7 @@ namespace pocketbase.net.Services
 
 
         private readonly Dictionary<string, List<Action<RealtimeEventArgs>>> subscriptions = new();
-        public string baseUrl { get; }
+        private string baseUrl { get; }
         private readonly HttpClient _httpcleint;
         private bool cancelled;
         private string _cleintId = "";
@@ -200,8 +200,8 @@ namespace pocketbase.net.Services
             var args = new RealtimeEventArgs()
             {
                 id = _cleintId,
-                Event = _event,
-                data = JsonSerializer.Deserialize<Dictionary<string, object>>(Data) ?? new()
+                @event = _event,
+                data = Deserialize<Dictionary<string, object>>(Data) ?? new()
             };
 
             if (!string.IsNullOrWhiteSpace(_event) && _event == "PB_CONNECT")
@@ -216,7 +216,7 @@ namespace pocketbase.net.Services
 
         void ProcessCallBacks(RealtimeEventArgs args)
         {
-            subscriptions[args.Event].ForEach((clb) => clb.Invoke(args));
+            subscriptions[args.@event].ForEach((clb) => clb.Invoke(args));
         }
 
         /// <summary>

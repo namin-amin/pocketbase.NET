@@ -6,15 +6,16 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using pocketbase.net.Helpers;
 using pocketbase.net.Models.Helpers;
+using static System.Text.Json.JsonSerializer;
 
 namespace pocketbase.net.Services
 {
     public class BaseAuthService<T> : BaseService
     {
         public event EventHandler? Onchange;
-        private string _token = "";
+        internal string _token = "";
 
-        public BaseAuthService(HttpClient httpClient, string collectionName) : base(httpClient, collectionName)
+        public BaseAuthService(HttpClient httpClient, string collectionName, Pocketbase cleint) : base(httpClient, collectionName, cleint)
         {
         }
 
@@ -63,7 +64,7 @@ namespace pocketbase.net.Services
                 {
                     try
                     {
-                        return JsonSerializer.Deserialize<AdminAuthModel>(thing.ToString() ?? "", PbJsonOptions.options)!;
+                        return Deserialize<AdminAuthModel>(thing.ToString() ?? "", PbJsonOptions.options)!;
                     }
                     catch (Exception ex)
                     {
@@ -94,7 +95,7 @@ namespace pocketbase.net.Services
 
         public async Task<AdminRecord> GetFullList()
         {
-            return JsonSerializer.Deserialize<AdminRecord>(await base.GetFullList()) ?? new();
+            return Deserialize<AdminRecord>(await base.GetFullList()) ?? new();
         }
 
         public new async Task<AdminAuthModel> GetOne(string id, string expand)

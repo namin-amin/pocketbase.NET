@@ -1,32 +1,42 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
-using System.Text.Json;
 using System.Threading.Tasks;
 using pocketbase.net.Helpers;
 using pocketbase.net.Models.Helpers;
 using pocketbase.net.Services.Helpers;
+using static System.Text.Json.JsonSerializer;
 
 namespace pocketbase.net.Services
 {
     /// <summary>
     /// Base Service class defines all the basic operatins that a Service class shud be doing
     /// </summary>
-    public abstract class BaseService<M>
+    public class BaseService
     {
-        public readonly HttpClient _httpClient;
+        internal Pocketbase cleint;
+        internal readonly HttpClient _httpClient;
         public readonly string collectionName;
 
         private readonly UrlBuilder urlBuilder;
 
 
         public BaseService(HttpClient httpClient,
-                           string collectionName)
+                           string collectionName, Pocketbase cleint)
         {
             this.collectionName = collectionName;
             _httpClient = httpClient;
             urlBuilder = new UrlBuilder(collectionName);
+            this.cleint = cleint;
+        }
+
+        internal async Task<string> GetResponse(string id, IDictionary<string, string> queryParams)
+        {
+
+            var httpresult = await _httpClient!.GetAsync(urlBuilder.CollectionUrl(id, queryParams));
+            return await httpresult.Content.ReadAsStringAsync();
         }
 
         /// <summary>
@@ -35,21 +45,30 @@ namespace pocketbase.net.Services
         /// <param name="collectionName">name of the collection to be queried</param>
         /// <param name="id">If getting single record then required  id</param>
         /// <returns>Response schema based on the type of response</returns>
-        public async Task<string> GetFullList(string id = "", RecordListQueryParams? queryParams = null)
+        public async Task<string> GetFullList(int BatchSize = 100, RecordListQueryParams? queryParams = null)
         {
             queryParams ??= new();
             var qParams = new
             Dictionary<string, string>()
             {
                 {"page",queryParams.page.ToString()},
-                {"perPage",queryParams.perPage.ToString()},
+                {"perPage",BatchSize.ToString()},
                 {"sort",queryParams.sort},
                 {"filter",queryParams.filter},
                 {"expand",queryParams.expand}
             };
 
-            var httpresult = await _httpClient!.GetAsync(urlBuilder.CollectionUrl(id, qParams));
-            return await httpresult.Content.ReadAsStringAsync();
+            try
+            {
+                return await GetResponse("", qParams);
+            }
+            catch (System.Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return "";
+                // throw;
+            };
+
         }
 
         /// <summary>
@@ -57,10 +76,14 @@ namespace pocketbase.net.Services
         /// </summary>
         /// <typeparam name="T">collection objects Type</typeparam>
         /// <returns></returns>
-        public async Task<Record<T>> GetFullList<T>(RecordListQueryParams? queryParams = null) where T : PbBaseModel
+        public async Task<Record<T>> GetFullList<T>(int BatchSize, RecordListQueryParams? queryParams = null) where T : PbBaseModel
         {
-            var result = await GetFullList("", queryParams);
-            return JsonSerializer.Deserialize<Record<T>>(result, PbJsonOptions.options) ?? new Record<T>();
+            var result = await GetFullList(BatchSize, queryParams);
+            if (string.IsNullOrWhiteSpace(result))
+            {
+                return new();
+            }
+            return Deserialize<Record<T>>(result, PbJsonOptions.options) ?? new Record<T>();
         }
 
         /// <summary>
@@ -114,7 +137,7 @@ namespace pocketbase.net.Services
 
             try
             {
-                return JsonSerializer.Deserialize<Record<T>>(await GetList(Page, PerPage, queryParams)) ?? null;
+                return Deserialize<Record<T>>(await GetList(Page, PerPage, queryParams)) ?? null;
             }
             catch (Exception ex)
             {
@@ -125,6 +148,32 @@ namespace pocketbase.net.Services
         }
 
 
+        public async Task<Record<T>?> GetFirstListItem<T>(string filter, RecordListQueryParams? queryParams = null)
+        where T : PbBaseModel
+        {
+            var result = await GetFirstListItem(filter, queryParams);
+            return Deserialize<Record<T>>(result, PbJsonOptions.options);
+        }
+
+        public async Task<string> GetFirstListItem(string filter, RecordListQueryParams? queryParams = null)
+        {
+            queryParams ??= new();
+            queryParams.filter = filter;
+            var qParams = new
+             Dictionary<string, string>()
+            {
+                {"page",queryParams.page.ToString()},
+                {"perPage",queryParams.perPage.ToString()},
+                {"sort",queryParams.sort},
+                {"filter",queryParams.filter},
+                {"expand",queryParams.expand}
+            };
+
+            return await GetResponse("", qParams);
+        }
+
+
+
         /// <summary>
         /// Gets Record response from PoccketBase
         /// </summary>
@@ -132,11 +181,11 @@ namespace pocketbase.net.Services
         /// <returns></returns>
         public async Task<IDictionary<string, object>> GetOne(string id, string expand = "")
         {
-            var result = await GetFullList(id, new()
+            var result = await GetResponse(id, new Dictionary<string, string>()
             {
-                expand = expand
+                {"expand",expand.ToString()}
             });
-            return JsonSerializer.Deserialize<IDictionary<string, object>>(result, PbJsonOptions.options)!;
+            return Deserialize<IDictionary<string, object>>(result, PbJsonOptions.options)!;
         }
 
         /// <summary>
@@ -147,11 +196,11 @@ namespace pocketbase.net.Services
         /// <returns></returns>
         public async Task<T> GetOne<T>(string id, string expand = "")
         {
-            var result = await GetFullList(id, new()
+            var result = await GetResponse(id, new Dictionary<string, string>()
             {
-                expand = expand
+                {"expand",expand.ToString()}
             });
-            return JsonSerializer.Deserialize<T>(result, PbJsonOptions.options)!;
+            return Deserialize<T>(result, PbJsonOptions.options)!;
         }
 
         /// <summary>
@@ -190,7 +239,7 @@ namespace pocketbase.net.Services
         {
             var response = await _httpClient.PatchAsync(urlBuilder.CollectionUrl(id),
 
-                new StringContent(JsonSerializer.Serialize(data), System.Text.Encoding.UTF8, "application/json")
+                new StringContent(Serialize(data), System.Text.Encoding.UTF8, "application/json")
             );
             return (await response.Content.ReadFromJsonAsync<T>(PbJsonOptions.options))!;
         }
@@ -199,9 +248,10 @@ namespace pocketbase.net.Services
         /// </summary>
         /// <param name="id">id of the record to be deleted</param>
         /// <returns></returns>
-        public async void Delete(string id)
+        public async Task<bool> Delete(string id)
         {
-            await _httpClient.DeleteAsync(urlBuilder.CollectionUrl(id));
+            var result = await _httpClient.DeleteAsync(urlBuilder.CollectionUrl(id));
+            return result.StatusCode == HttpStatusCode.OK;
         }
 
     }
