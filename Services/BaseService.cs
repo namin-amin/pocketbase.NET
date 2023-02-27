@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net;
+﻿using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using pocketbase.net.Helpers;
 using pocketbase.net.Models.Helpers;
 using pocketbase.net.Services.Helpers;
-using static System.Text.Json.JsonSerializer;
 
 namespace pocketbase.net.Services
 {

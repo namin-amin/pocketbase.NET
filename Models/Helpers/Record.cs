@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace pocketbase.net.Models.Helpers
+﻿namespace pocketbase.net.Models.Helpers
 {
     public class Record<T> : BaseRecord
         where T : PbBaseModel

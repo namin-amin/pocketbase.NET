@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using pocketbase.net.Models.Helpers;
+﻿using pocketbase.net.Models.Helpers;
 
 namespace pocketbase.net.Models
 {

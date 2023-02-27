@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace pocketbase.net.Models.Helpers
+﻿namespace pocketbase.net.Models.Helpers
 {
     public class AdminAuthModel : BaseModel
     {

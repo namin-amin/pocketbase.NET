@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace pocketbase.net.Models.Helpers
+﻿namespace pocketbase.net.Models.Helpers
 {
     public class PbBaseModel : BaseModel
     {
