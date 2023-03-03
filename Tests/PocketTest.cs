@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Tests.Mock;
-using pocketbase.net;
+﻿using pocketbase.net;
 using pocketbase.net.Services;
+using Tests.Mock;
 
 namespace Tests
 {
@@ -35,10 +30,15 @@ namespace Tests
         [TestMethod]
         public void TestRecord()
         {
-
             Assert.AreEqual($"api/collections/{MockData.testCollName}/records/", postRecord.urlBuilder.CollectionUrl());
+        }
 
-
+        [TestMethod]
+        public void TestCollection()
+        {
+            var actual = cleint.collection._baseService.urlBuilder.CollectionUrl();
+            Assert.AreEqual("api/collections/", actual);
+            // Assert.AreEqual("api/collections/", actual);
         }
     }
 }

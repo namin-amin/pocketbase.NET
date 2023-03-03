@@ -12,7 +12,7 @@ namespace pocketbase.net.Services
     public class CollectionService
     {
 
-        private readonly BaseService _baseService;
+        public readonly BaseService _baseService;
 
         public CollectionService(HttpClient httpClient, Pocketbase cleint)
         {

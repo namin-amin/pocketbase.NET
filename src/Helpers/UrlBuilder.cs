@@ -1,9 +1,4 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.WebUtilities;
 
 namespace pocketbase.net.Helpers
@@ -15,13 +10,17 @@ namespace pocketbase.net.Helpers
         public string recordType { get; set; } = string.Empty;
         public UrlBuilder(string collectionName)
         {
-            recordType = "/";
+
             if (collectionName != "admins")
             {
                 this.collectionName = collectionName;
                 collectionType = "collections/";
                 recordType = "/records/";
             }
+            if (collectionName == string.Empty)
+            {
+                this.recordType = "";
+            };
         }
         private string collectionName { get; set; } = string.Empty;
 

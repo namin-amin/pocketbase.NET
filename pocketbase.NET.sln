@@ -5,8 +5,6 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "pocketbase.net", "src\pocketbase.net.csproj", "{C2CEEE33-699E-43EF-AFE8-340A62211DA5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "test", "test\test.csproj", "{09D15C0D-D47C-4C1A-A49E-772C7C6DF292}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{7B856813-85B9-4218-8605-6B3689A7CDEB}"
 EndProject
 Global
@@ -19,10 +17,6 @@ Global
 		{C2CEEE33-699E-43EF-AFE8-340A62211DA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C2CEEE33-699E-43EF-AFE8-340A62211DA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C2CEEE33-699E-43EF-AFE8-340A62211DA5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{09D15C0D-D47C-4C1A-A49E-772C7C6DF292}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{09D15C0D-D47C-4C1A-A49E-772C7C6DF292}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{09D15C0D-D47C-4C1A-A49E-772C7C6DF292}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{09D15C0D-D47C-4C1A-A49E-772C7C6DF292}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7B856813-85B9-4218-8605-6B3689A7CDEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7B856813-85B9-4218-8605-6B3689A7CDEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7B856813-85B9-4218-8605-6B3689A7CDEB}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net.Http;
+﻿using System.Net.Http;
 using Microsoft.Extensions.DependencyInjection;
 using pocketbase.net.Models.Helpers;
 using pocketbase.net.Services;
