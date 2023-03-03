@@ -32,7 +32,7 @@ namespace pocketbase.net.Helpers
         /// <returns></returns>
         public string CollectionUrl(string id = "", IDictionary<string, string>? queryParams = null)
         {
-            var baseUrl = collectionType + collectionName.ToLower() + recordType + id;
+            var baseUrl = "api/" + collectionType + collectionName.ToLower() + recordType + id;
             return QueryBuilder(queryParams, baseUrl);
         }
         // public string CollectionUrl(string id = "")
