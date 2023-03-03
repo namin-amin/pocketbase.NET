@@ -8,8 +8,8 @@ namespace test.Mock
 {
     public static class MockData
     {
-        public static string testUrl = "http://test.com";
-        public static string testCollName = "posts";
-        public static string testLang = "en-US";   
+        public const string testUrl = "http://test.com";
+        public const string testCollName = "posts";
+        public const string testLang = "en-US";
     }
 }

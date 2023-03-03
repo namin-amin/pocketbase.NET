@@ -17,7 +17,7 @@ namespace pocketbase.net.Services
         internal readonly HttpClient _httpClient;
         public readonly string collectionName;
 
-        private readonly UrlBuilder urlBuilder;
+        public readonly UrlBuilder urlBuilder;
 
 
         public BaseService(HttpClient httpClient,

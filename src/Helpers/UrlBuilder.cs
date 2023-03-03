@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.WebUtilities;
 
 namespace pocketbase.net.Helpers
 {
-    internal class UrlBuilder
+    public class UrlBuilder
     {
 
         public string collectionType { get; set; } = string.Empty;
