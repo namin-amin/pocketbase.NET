@@ -1,5 +1,15 @@
 GET http://127.0.0.1:8090/api/collections/posts/records
 
-
+###
 
 GET http://127.0.0.1:8090/api/collections
+
+###
+
+POST http://127.0.0.1:8090/api/collections/posts/records
+Content-Type: "application/json"
+
+{
+    "test": "helloooooo",
+    "post": "iiiiiiiiiiiiiiiiiiiiiiiii"
+}
