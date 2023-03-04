@@ -1,7 +1,9 @@
 ﻿using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+using Microsoft.Net.Http.Headers;
 using pocketbase.net.Helpers;
 using pocketbase.net.Models.Helpers;
 using pocketbase.net.Services.Helpers;
@@ -32,7 +34,7 @@ namespace pocketbase.net.Services
         internal async Task<string> GetResponse(string id, IDictionary<string, string> queryParams)
         {
 
-            var httpresult = await _httpClient!.GetAsync(urlBuilder.CollectionUrl(id, queryParams));
+            var httpresult = await SendAsync(urlBuilder.CollectionUrl(id, queryParams));
             return await httpresult.Content.ReadAsStringAsync();
         }
 
@@ -249,6 +251,19 @@ namespace pocketbase.net.Services
         {
             var result = await _httpClient.DeleteAsync(urlBuilder.CollectionUrl(id));
             return result.StatusCode == HttpStatusCode.OK;
+        }
+
+        public async Task<HttpResponseMessage> SendAsync(string url)
+        {
+            var content = new StringContent("");
+            content.Headers.Add("Authorization", cleint.authStore._token);
+            var message = new HttpRequestMessage
+            {
+                Content = content,
+                RequestUri = new Uri(url)
+            };
+            return await _httpClient.SendAsync(message);
+
         }
 
     }

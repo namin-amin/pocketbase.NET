@@ -36,9 +36,9 @@ namespace pocketbase.net
             this.baseurl = baseurl;
             this.httpClient.BaseAddress = new Uri(baseurl);
             this.lang = lang ?? "en-US";
-            realtimeService = new RealtimeService(baseurl, this.httpClient);
+            realtimeService = new(baseurl, this.httpClient);
             authStore = new(this.httpClient, "admins", this);
-            collection = new CollectionService(this.httpClient, this);
+            collection = new(this.httpClient, this);
         }
 
         void FumSerivce(object? o, EventArgs e)
@@ -63,11 +63,10 @@ namespace pocketbase.net
                 return collectionService;
             }
 
-            collectionService = new RecordService(httpClient, collectionname, realtimeService, this);
+            collectionService = new(httpClient, collectionname, realtimeService, this);
             RecordCollection.Add(collectionname, collectionService);
             return collectionService;
         }
-
 
     }
 

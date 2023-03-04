@@ -10,10 +10,10 @@ namespace pocketbase.net.Helpers
         public string recordType { get; set; } = string.Empty;
         public UrlBuilder(string collectionName)
         {
-
+            this.collectionName = collectionName;
             if (collectionName != "admins")
             {
-                this.collectionName = collectionName;
+
                 collectionType = "collections/";
                 recordType = "/records/";
             }

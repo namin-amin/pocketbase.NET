@@ -1,4 +1,7 @@
-﻿using pocketbase.net;
+﻿using System.Net.Security;
+using Microsoft.Extensions.DependencyInjection;
+using pocketbase.net;
+using pocketbase.net.Models.Helpers;
 using pocketbase.net.Services;
 using Tests.Mock;
 
@@ -9,12 +12,16 @@ namespace Tests
     {
         public Pocketbase cleint { get; set; } = default!;
         public RecordService postRecord = default!;
+        private CollectionService collections = default!;
+        private BaseAuthService<AdminAuthModel> auth = default!;
 
         [TestInitialize]
         public void Setup()
         {
             cleint = new Pocketbase(MockData.testUrl, null, null);
             postRecord = cleint.Collections(MockData.testCollName);
+            collections = cleint.collection;
+            auth = cleint.authStore;
         }
 
 
@@ -36,9 +43,16 @@ namespace Tests
         [TestMethod]
         public void TestCollection()
         {
-            var actual = cleint.collection._baseService.urlBuilder.CollectionUrl();
+            var actual = collections._baseService.urlBuilder.CollectionUrl();
             Assert.AreEqual("api/collections/", actual);
-            // Assert.AreEqual("api/collections/", actual);
+            Assert.AreEqual(string.Empty, collections._baseService.collectionName);
+        }
+
+        [TestMethod]
+        public void AuthTest()
+        {
+            Assert.AreEqual("admins", auth.collectionName);
+            Assert.AreEqual("api/admins", auth.urlBuilder.CollectionUrl());
         }
     }
 }
