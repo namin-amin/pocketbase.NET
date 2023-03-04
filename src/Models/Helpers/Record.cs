@@ -24,7 +24,7 @@
 
     public class AdminRecord : BaseRecord
     {
-        public IEnumerable<AdminAuthModel> items { get; set; } = new List<AdminAuthModel>();
+        public IEnumerable<RecordAuthModel> items { get; set; } = new List<RecordAuthModel>();
     }
     public abstract class BaseRecord
     {

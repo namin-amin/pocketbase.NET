@@ -11,6 +11,7 @@ namespace pocketbase.net.Services
     public class RecordService : BaseService
     {
         internal RealtimeService realtimeService { get; }
+        internal BaseAuthService<RecordAuthModel> baseAuthService { get; }
         internal RecordService(
            HttpClient _httpClient,
            string collectionName,
@@ -19,6 +20,7 @@ namespace pocketbase.net.Services
        ) : base(_httpClient, collectionName, cleint)
         {
             this.realtimeService = realtimeService;
+            this.baseAuthService =  new(_httpClient,collectionName,cleint);
         }
 
 
@@ -46,12 +48,12 @@ namespace pocketbase.net.Services
             return await _httpClient.GetStringAsync($"api/collections/{collectionName}/auth-methods");
         }
 
-        public async Task<AdminAuthModel> AuthWithPassword(
+        public async Task<RecordAuthModel> AuthWithPassword(
            string email,
            string password
        )
         {
-            return await cleint.authStore.AuthWithPassword(email, password,collectionName);
+            return await baseAuthService.AuthWithPassword(email, password,collectionName);
         }
     }
 }

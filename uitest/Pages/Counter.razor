@@ -36,8 +36,12 @@
 
     private async Task Authtenticate()
     {
-        var resp = await pb.Collections("users").AuthWithPassword(usname, pwd);
-        var resp2 = await pb.Collections("posts").GetFullList();
+        //var resp = await pb.Collections("users").AuthWithPassword(usname, pwd);
+        //var resp2 = await pb.Collections("posts").GetFullList();
+
+       var resp = await pb.admins.AuthWithPassword(usname, pwd);
+
+      // var t = 
 
         token = pb.authStore.token;
 

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using pocketbase.net.Models.Helpers;
 using pocketbase.net.Services;
+using pocketbase.net.Store;
 
 namespace pocketbase.net
 {
@@ -17,8 +18,9 @@ namespace pocketbase.net
 
         private readonly Dictionary<string, RecordService> RecordCollection = new();
 
-        public BaseAuthService<AdminAuthModel> authStore { get; set; }
+        public AdminService  admins { get; set; }
 
+        public BaseAuthStore authStore{ get; set; }
         private RealtimeService realtimeService { get; set; }
 
         public CollectionService collection { get; set; }
@@ -40,7 +42,8 @@ namespace pocketbase.net
             this.httpClient.BaseAddress = new Uri(baseurl);
             this.lang = lang ?? "en-US";
             realtimeService = new(baseurl, this.httpClient);
-            authStore = new(this.httpClient, "admins", this);
+            authStore = new();
+            admins = new(this.httpClient, this);
             collection = new(this.httpClient, this);
         }
 

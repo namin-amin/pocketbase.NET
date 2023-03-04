@@ -1,0 +1,44 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace pocketbase.net.Store
+{
+    public class BaseAuthStore
+    {
+        public event EventHandler? Onchange;
+        private string _token = "";
+        private dynamic _model = default!;
+
+        public bool isValid
+        {
+            get; private set;
+        }
+
+        public string token
+        {
+            get { return _token; }
+            internal set { _token = value; }
+        }
+
+        public dynamic model
+        { 
+            get { return _model; }
+            internal set { 
+                _model = value;
+            }
+        }
+
+        public void Clear(Action<object, EventArgs>? callback = null)
+        {
+            _token = "";
+            isValid = false;
+            //?How to format the eventargs?
+            callback?.Invoke(this, new EventArgs());
+            Onchange?.Invoke(this, new EventArgs());
+        }
+
+    }
+}
