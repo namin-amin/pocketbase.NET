@@ -2,7 +2,7 @@
 {
     public class AdminAuthModel : BaseModel
     {
-        public string emailVisibility { get; set; } = string.Empty;
-        public int avatar { get; set; }
+        public bool emailVisibility { get; set; } 
+        public string avatar { get; set; } = "0";
     }
 }

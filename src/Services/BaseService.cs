@@ -1,9 +1,6 @@
 ﻿using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
 using System.Threading.Tasks;
-using Microsoft.Net.Http.Headers;
 using pocketbase.net.Helpers;
 using pocketbase.net.Models.Helpers;
 using pocketbase.net.Services.Helpers;
@@ -31,10 +28,17 @@ namespace pocketbase.net.Services
             this.cleint = cleint;
         }
 
-        internal async Task<string> GetResponse(string id, IDictionary<string, string> queryParams)
+        internal async Task<string> GetResponse(string id="",RequestParams? requestParams = null)
         {
+            StringContent? content = null;   
+            requestParams ??= new RequestParams();
 
-            var httpresult = await SendAsync(urlBuilder.CollectionUrl(id, queryParams));
+            if (requestParams.body !=  null)
+            {
+              content = new StringContent(Serialize(requestParams.body, PbJsonOptions.options));
+            }
+
+            var httpresult = await cleint.SendAsync(urlBuilder.CollectionUrl(id, requestParams.queryParams),HttpMethod.Get,content);
             return await httpresult.Content.ReadAsStringAsync();
         }
 
@@ -59,7 +63,7 @@ namespace pocketbase.net.Services
 
             try
             {
-                return await GetResponse("", qParams);
+                return await GetResponse();
             }
             catch (System.Exception ex)
             {
@@ -105,20 +109,20 @@ namespace pocketbase.net.Services
                 {"sort",queryParams.sort},
                 {"filter",queryParams.filter}
             };
-
-            string? list;
             try
             {
-                var t = await _httpClient!.GetAsync(urlBuilder.CollectionUrl(queryParams: qParams));
-                list = await t.Content.ReadAsStringAsync();
+                return await GetResponse(requestParams: new()
+                {
+                    queryParams = qParams,
+                });
             }
             catch (Exception ex)
             {
 
                 Console.WriteLine(ex.Message);
-                throw;
+                return "";
             }
-            return list;
+            
         }
 
         /// <summary>
@@ -168,7 +172,7 @@ namespace pocketbase.net.Services
                 {"expand",queryParams.expand}
             };
 
-            return await GetResponse("", qParams);
+            return await GetResponse(requestParams: new(){queryParams=qParams});
         }
 
 
@@ -180,9 +184,12 @@ namespace pocketbase.net.Services
         /// <returns></returns>
         public async Task<IDictionary<string, object>> GetOne(string id, string expand = "")
         {
-            var result = await GetResponse(id, new Dictionary<string, string>()
+            var result = await GetResponse(id, new()
+            {
+                queryParams = new Dictionary<string, string>()
             {
                 {"expand",expand.ToString()}
+            }
             });
             return Deserialize<IDictionary<string, object>>(result, PbJsonOptions.options)!;
         }
@@ -194,12 +201,16 @@ namespace pocketbase.net.Services
         /// <typeparam name="T">collection objects Type</typeparam>
         /// <returns></returns>
         public async Task<T> GetOne<T>(string id, string expand = "")
+            where T : class,new()
         {
-            var result = await GetResponse(id, new Dictionary<string, string>()
+            var result = await GetResponse(id, new()
+            {
+                queryParams= new Dictionary<string, string>()
             {
                 {"expand",expand.ToString()}
+            }
             });
-            return Deserialize<T>(result, PbJsonOptions.options)!;
+            return Deserialize<T>(result, PbJsonOptions.options)??new();
         }
 
         /// <summary>
@@ -209,8 +220,12 @@ namespace pocketbase.net.Services
         /// <returns></returns>
         public async Task<IDictionary<string, object>> Create(IDictionary<string, object> data)
         {
-            var response = await _httpClient.PostAsJsonAsync(urlBuilder.CollectionUrl(), data);
-            return (await response.Content.ReadFromJsonAsync<IDictionary<string, object>>(PbJsonOptions.options))!;
+            var response = await GetResponse(requestParams: new()
+            {
+                body = data,
+                method = HttpMethod.Post,
+            });
+           return Deserialize<IDictionary<string,object>>(response)?? new Dictionary<string,object>();
         }
 
         /// <summary>
@@ -221,9 +236,14 @@ namespace pocketbase.net.Services
         /// <typeparam name="D">Type of input object</typeparam>
         /// <returns></returns>
         public async Task<T> Create<T, D>(D data)
+            where T : class,new()
         {
-            var response = await _httpClient.PostAsJsonAsync(urlBuilder.CollectionUrl(), data);
-            return (await response.Content!.ReadFromJsonAsync<T>(PbJsonOptions.options))!;
+            var response = await GetResponse(requestParams: new()
+            {
+                body = data,
+                method = HttpMethod.Post,
+            });
+            return (Deserialize<T>(response,PbJsonOptions.options))??new();
         }
 
         /// <summary>
@@ -235,12 +255,15 @@ namespace pocketbase.net.Services
         /// <typeparam name="D">type of input object</typeparam>
         /// <returns></returns>
         public async Task<T> Update<T, D>(D data, string id)
+            where T : class,new()
         {
-            var response = await _httpClient.PatchAsync(urlBuilder.CollectionUrl(id),
-
-                new StringContent(Serialize(data), System.Text.Encoding.UTF8, "application/json")
+            var response = await GetResponse(id,requestParams: new()
+            {
+                body= data,
+                method= HttpMethod.Patch,
+            }    
             );
-            return (await response.Content.ReadFromJsonAsync<T>(PbJsonOptions.options))!;
+            return Deserialize<T>(response)??new();
         }
         /// <summary>
         /// Delete Record
@@ -253,18 +276,7 @@ namespace pocketbase.net.Services
             return result.StatusCode == HttpStatusCode.OK;
         }
 
-        public async Task<HttpResponseMessage> SendAsync(string url)
-        {
-            var content = new StringContent("");
-            content.Headers.Add("Authorization", cleint.authStore._token);
-            var message = new HttpRequestMessage
-            {
-                Content = content,
-                RequestUri = new Uri(url)
-            };
-            return await _httpClient.SendAsync(message);
-
-        }
+   
 
     }
 }

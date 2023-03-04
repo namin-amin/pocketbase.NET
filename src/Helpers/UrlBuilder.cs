@@ -29,9 +29,13 @@ namespace pocketbase.net.Helpers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public string CollectionUrl(string id = "", IDictionary<string, string>? queryParams = null)
+        public string CollectionUrl(string id = "", IDictionary<string, string>? queryParams = null,string overideColName = "")
         {
-            var baseUrl = "api/" + collectionType + collectionName.ToLower() + recordType + id;
+            
+            var baseUrl = "api/" + 
+                (overideColName == ""?  collectionType : "collections/") +
+                (overideColName == ""? collectionName.ToLower():overideColName.ToLower()) + 
+                recordType + id;
             return QueryBuilder(queryParams, baseUrl);
         }
         // public string CollectionUrl(string id = "")

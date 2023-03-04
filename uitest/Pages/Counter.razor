@@ -1,0 +1,47 @@
+﻿@page "/counter"
+@using pocketbase.net;
+@using System.Text.Json;
+@inject Pocketbase pb
+
+<PageTitle>Counter</PageTitle>
+
+<h1>Counter</h1>
+
+<p role="status">Current count: @currentCount</p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+
+<div>
+    <input type="text" @bind-value="usname" />
+    <input type="password" @bind-value="pwd" />
+    <button class="btn btn-primary" @onclick="Authtenticate">login</button>
+</div>
+
+<h2>@token</h2>
+
+@code {
+    private int currentCount = 0;
+    private string token = "";
+
+    private string usname = "";
+    private string pwd = "";
+
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+
+    private async Task Authtenticate()
+    {
+        var resp = await pb.Collections("users").AuthWithPassword(usname, pwd);
+        var resp2 = await pb.Collections("posts").GetFullList();
+
+        token = pb.authStore.token;
+
+        var tt = await pb.collection.GetFullList();
+        Console.WriteLine(JsonSerializer.Serialize(tt,pocketbase.net.Helpers.PbJsonOptions.options));
+    }
+}

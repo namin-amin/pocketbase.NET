@@ -51,37 +51,7 @@ namespace pocketbase.net.Services
            string password
        )
         {
-            var response = await _httpClient.PostAsJsonAsync(collectionName + "/auth-with-password", new
-            {
-                identity = email,
-                password
-            });
-
-            var data = await
-                        response.Content.ReadFromJsonAsync<IDictionary<string, object>>()
-                        ??
-                        new Dictionary<string, object>();
-
-
-            if (data.TryGetValue("token", out object? value))
-            {
-                cleint.authStore._token = value?.ToString()!;
-                if (data.TryGetValue("admin", out object? thing))
-                {
-                    try
-                    {
-                        return Deserialize<AdminAuthModel>(thing.ToString() ?? "", PbJsonOptions.options)!;
-                    }
-                    catch (Exception ex)
-                    {
-
-                        Console.WriteLine(ex.Message);
-                    }
-                }
-                return new();
-            }
-
-            return new();
+            return await cleint.authStore.AuthWithPassword(email, password,collectionName);
         }
     }
 }

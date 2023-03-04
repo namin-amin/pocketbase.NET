@@ -1,4 +1,7 @@
-﻿using System.Net.Http;
+﻿using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using pocketbase.net.Models.Helpers;
 using pocketbase.net.Services;
@@ -33,7 +36,7 @@ namespace pocketbase.net
                           HttpClient? httpClient)
         {
             this.httpClient = httpClient ?? new HttpClient();
-            this.baseurl = baseurl;
+            this.baseurl = baseurl.EndsWith("/")? baseurl:baseurl+"/";
             this.httpClient.BaseAddress = new Uri(baseurl);
             this.lang = lang ?? "en-US";
             realtimeService = new(baseurl, this.httpClient);
@@ -66,6 +69,31 @@ namespace pocketbase.net
             collectionService = new(httpClient, collectionname, realtimeService, this);
             RecordCollection.Add(collectionname, collectionService);
             return collectionService;
+        }
+
+
+
+        public async Task<HttpResponseMessage> SendAsync(string url, HttpMethod httpMethod, StringContent? content = null)
+        {
+            try
+            {
+                var message = new HttpRequestMessage
+                {
+                    RequestUri = new Uri(baseurl!.ToString() + url),
+                    Method = httpMethod,
+                };
+
+                if (content != null && httpMethod != HttpMethod.Get) message.Content = content;
+                if (authStore.token != "")
+                    message.Headers.Authorization = new AuthenticationHeaderValue(authStore.token);
+                return await httpClient.SendAsync(message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return new(HttpStatusCode.InternalServerError);
+            }
+
         }
 
     }

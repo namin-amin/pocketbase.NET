@@ -1,0 +1,5 @@
+POST http://127.0.0.1:8090/admins/auth-with-password
+{
+  "identity":"navaneesh185@gmail.com",
+  "password":"Aequs12345"
+}

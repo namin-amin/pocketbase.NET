@@ -1,3 +1,5 @@
+using System.Net.Http;
+
 namespace pocketbase.net.Services.Helpers
 {
     public class ListQueryParams
@@ -31,6 +33,13 @@ namespace pocketbase.net.Services.Helpers
     public class FileQueryParams
     {
         public string thumb { get; set; } = string.Empty;
+    }
+
+    public class RequestParams
+    {
+        public HttpMethod method { get; set; } = HttpMethod.Get;
+        public Dictionary<string, string>? queryParams { get; set; } = null;
+        public object? body { get; set; } = null;
     }
 
 }
