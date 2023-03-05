@@ -16,6 +16,6 @@ var Records =  await Pb.Collections("posts").GetFullList();
 
 - [x] CRUD
 - [x] Realtime
-- [ ] Auth
+- [x] Basic Auth
+- [ ] External Auth
 - [ ] Test
-- [ ] Blazor Cleint Extensions
