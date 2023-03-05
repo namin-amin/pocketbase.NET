@@ -18,9 +18,9 @@ namespace pocketbase.net
 
         private readonly Dictionary<string, RecordService> RecordCollection = new();
 
-        public AdminService  admins { get; set; }
+        public AdminService admins { get; set; }
 
-        public BaseAuthStore authStore{ get; set; }
+        public BaseAuthStore authStore { get; set; }
         private RealtimeService realtimeService { get; set; }
 
         public CollectionService collection { get; set; }
@@ -38,9 +38,26 @@ namespace pocketbase.net
                           HttpClient? httpClient)
         {
             this.httpClient = httpClient ?? new HttpClient();
-            this.baseurl = baseurl.EndsWith("/")? baseurl:baseurl+"/";
+            this.baseurl = baseurl.EndsWith("/") ? baseurl : baseurl + "/";
             this.httpClient.BaseAddress = new Uri(baseurl);
             this.lang = lang ?? "en-US";
+            realtimeService = new(baseurl, this.httpClient);
+            authStore = new();
+            admins = new(this.httpClient, this);
+            collection = new(this.httpClient, this);
+        }
+        /// <summary>
+        /// Init Pocketbase Cleint
+        /// </summary>
+        /// <param name="baseurl">represents the baseurl of the Pocketbase server</param>
+        /// <param name="httpClient">Provide a HttpCleint to be used if already initialiased else pass null New one will be created</param>
+        public Pocketbase(string baseurl,
+                         HttpClient? httpClient)
+        {
+            this.httpClient = httpClient ?? new HttpClient();
+            this.baseurl = baseurl.EndsWith("/") ? baseurl : baseurl + "/";
+            this.httpClient.BaseAddress = new Uri(baseurl);
+            this.lang = "en-US";
             realtimeService = new(baseurl, this.httpClient);
             authStore = new();
             admins = new(this.httpClient, this);
@@ -75,7 +92,13 @@ namespace pocketbase.net
         }
 
 
-
+        /// <summary>
+        /// Send requests to pb server
+        /// </summary>
+        /// <param name="url">url to connect and send with details of operation</param>
+        /// <param name="httpMethod">http method to be used</param>
+        /// <param name="content">Content to be sent</param>
+        /// <returns></returns>
         public async Task<HttpResponseMessage> SendAsync(string url, HttpMethod httpMethod, StringContent? content = null)
         {
             try

@@ -1,9 +1,9 @@
 namespace pocketbase.net.Models
 {
     /// <summary>
-    /// Represents tthe 
+    /// Represents Realtime event args 
     /// </summary>
-    public class RealtimeEventArgs
+    public class RealtimeEventArgs : EventArgs
     {
         public string id { get; set; } = string.Empty;
         public string @event { get; set; } = string.Empty;//this rule violation not fixed as it conflicts with event keyword

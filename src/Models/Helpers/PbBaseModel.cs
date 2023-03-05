@@ -1,5 +1,8 @@
 ﻿namespace pocketbase.net.Models.Helpers
 {
+    /// <summary>
+    /// Model represents pocketbase collection base class
+    /// </summary>
     public class PbBaseModel : BaseModel
     {
         public string collectionId { get; set; } = string.Empty;

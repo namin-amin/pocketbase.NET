@@ -1,5 +1,9 @@
 ﻿namespace pocketbase.net.Models.Helpers
 {
+    /// <summary>
+    /// Record is class representing the returned data
+    /// </summary>
+    /// <typeparam name="T">type of items</typeparam>
     public class Record<T> : BaseRecord
         where T : PbBaseModel
     {
@@ -8,6 +12,10 @@
         public IEnumerable<T> items { get; set; } = new List<T>();
     }
 
+    /// <summary>
+    /// Same as Record but used for AuthAdminModel and Adminmodel
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class ColRecord<T> : BaseRecord
         where T : BaseModel
     {

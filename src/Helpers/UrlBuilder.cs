@@ -27,14 +27,14 @@ namespace pocketbase.net.Helpers
         /// <summary>
         /// builds the request url for records
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="id">collection/record id to which requestto be made</param>
         /// <returns></returns>
-        public string CollectionUrl(string id = "", IDictionary<string, string>? queryParams = null,string overideColName = "")
+        public string CollectionUrl(string id = "", IDictionary<string, string>? queryParams = null, string overideColName = "")
         {
-            
-            var baseUrl = "api/" + 
-                (overideColName == ""?  collectionType : "collections/") +
-                (overideColName == ""? collectionName.ToLower():overideColName.ToLower()) + 
+
+            var baseUrl = "api/" +
+                (overideColName == "" ? collectionType : "collections/") +
+                (overideColName == "" ? collectionName.ToLower() : overideColName.ToLower()) +
                 recordType + id;
             return QueryBuilder(queryParams, baseUrl);
         }
@@ -43,7 +43,13 @@ namespace pocketbase.net.Helpers
         //     return collectionType + collectionName.ToLower() + recordType + id;
         // }
 
-        private static string QueryBuilder(IDictionary<string, string>? queryParams, string baseUrl)
+        /// <summary>
+        /// Build query on the url provided
+        /// </summary>
+        /// <param name="queryParams">query details as string dcitionary</param>
+        /// <param name="baseUrl">url to which query to be appended</param>
+        /// <returns></returns>
+        public static string QueryBuilder(IDictionary<string, string>? queryParams, string baseUrl)
         {
             if (queryParams is null) return baseUrl;
 

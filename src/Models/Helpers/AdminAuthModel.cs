@@ -1,5 +1,8 @@
 ﻿namespace pocketbase.net.Models.Helpers;
 
+/// <summary>
+/// Authmodel representing user auth model
+/// </summary>
 public class RecordAuthModel : PbBaseModel
 {
     public bool emailVisibility { get; set; }

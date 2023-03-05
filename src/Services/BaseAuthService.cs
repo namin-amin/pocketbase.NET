@@ -7,30 +7,42 @@ using pocketbase.net.Models.Helpers;
 
 namespace pocketbase.net.Services
 {
+    /// <summary>
+    /// Common authetication related services
+    /// </summary>
+    /// <typeparam name="T">Type of the authentication model RecordAuthmodel or Admin</typeparam>
     public class BaseAuthService<T> : BaseService
-        where T : class,new()
+        where T : class, new()
     {
-        
+
 
         public BaseAuthService(HttpClient httpClient, string collectionName, Pocketbase cleint) : base(httpClient, collectionName, cleint)
         {
         }
 
 
+        /// <summary>
+        /// Authenticate with password and email
+        /// </summary>
+        /// <param name="email">email or username representng the authrecord / admin</param>
+        /// <param name="password">password of the user</param>
+        /// <param name="url"></param>
+        /// <returns></returns>
         public async Task<T> AuthWithPassword(
             string email,
             string password,
             string url = ""
         )
         {
-            url = url == "" ? urlBuilder.CollectionUrl():urlBuilder.CollectionUrl(overideColName:url);
-            url = url + "/auth-with-password";
+            url = url == "" ? urlBuilder.CollectionUrl() : urlBuilder.CollectionUrl(overideColName: url);
+            url += "/auth-with-password";
+
             var response = await _httpClient.PostAsJsonAsync(
-              url  , new
-            {
-                identity = email,
-                password
-            });
+              url, new
+              {
+                  identity = email,
+                  password
+              });
 
             var data = await
                         response.Content.ReadFromJsonAsync<IDictionary<string, object>>()
@@ -41,12 +53,12 @@ namespace pocketbase.net.Services
 
             if (data.TryGetValue("token", out object? value))
             {
-                cleint.authStore.token =  value?.ToString()!;
-                if (data.TryGetValue("admin", out object? admin) )
+                cleint.authStore.token = value?.ToString()!;
+                if (data.TryGetValue("admin", out object? admin))
                 {
                     try
                     {
-                        cleint.authStore.model = Deserialize<T>(admin?.ToString() ?? "", PbJsonOptions.options);
+                        cleint.authStore.model = Deserialize<T>(admin?.ToString() ?? "", PbJsonOptions.options) ?? new();
                         return cleint.authStore.model;
                     }
                     catch (Exception ex)
@@ -59,7 +71,7 @@ namespace pocketbase.net.Services
                 {
                     try
                     {
-                        cleint.authStore.model = Deserialize<T>(record?.ToString() ?? "", PbJsonOptions.options);
+                        cleint.authStore.model = Deserialize<T>(record?.ToString() ?? "", PbJsonOptions.options) ?? new();
                         return cleint.authStore.model;
                     }
                     catch (Exception ex)
@@ -73,6 +85,10 @@ namespace pocketbase.net.Services
             return new();
         }
 
+        /// <summary>
+        /// Refresh currently authenticated users Auth details
+        /// </summary>
+        /// <returns></returns>
         public async Task<RecordAuthModel> Refresh()
         {
             var data = await _httpClient.PostAsJsonAsync("admins", new
@@ -88,6 +104,13 @@ namespace pocketbase.net.Services
             return new();
         }
 
+
+        ///TODO implementing external auth and making this a abstarct class
+
+        /// <summary>
+        /// Getlist of Auth details
+        /// </summary>
+        /// <returns></returns>
         public async Task<AdminRecord> GetFullList()
         {
             return Deserialize<AdminRecord>(await base.GetFullList()) ?? new();

@@ -2,6 +2,9 @@
 
 namespace pocketbase.net.Models
 {
+    /// <summary>
+    /// External auth model
+    /// </summary>
     public class ExternalAuth : BaseModel
     {
         public string recordId { get; set; } = string.Empty;

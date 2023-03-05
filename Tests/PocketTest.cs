@@ -12,8 +12,7 @@ namespace Tests
     {
         public Pocketbase cleint { get; set; } = default!;
         public RecordService postRecord = default!;
-        private CollectionService collections = default!;
-       // private BaseAuthService<RecordAuthModel> auth = default!;
+        public CollectionService collections = default!;
 
         [TestInitialize]
         public void Setup()
@@ -21,7 +20,7 @@ namespace Tests
             cleint = new Pocketbase(MockData.testUrl, null, null);
             postRecord = cleint.Collections(MockData.testCollName);
             collections = cleint.collection;
-           // auth = cleint.authStore;
+            // auth = cleint.authStore;
         }
 
 

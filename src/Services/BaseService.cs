@@ -28,17 +28,17 @@ namespace pocketbase.net.Services
             this.cleint = cleint;
         }
 
-        internal async Task<string> GetResponse(string id="",RequestParams? requestParams = null)
+        internal async Task<string> GetResponse(string id = "", RequestParams? requestParams = null)
         {
-            StringContent? content = null;   
+            StringContent? content = null;
             requestParams ??= new RequestParams();
 
-            if (requestParams.body !=  null)
+            if (requestParams.body != null)
             {
-              content = new StringContent(Serialize(requestParams.body, PbJsonOptions.options));
+                content = new StringContent(Serialize(requestParams.body, PbJsonOptions.options));
             }
 
-            var httpresult = await cleint.SendAsync(urlBuilder.CollectionUrl(id, requestParams.queryParams),HttpMethod.Get,content);
+            var httpresult = await cleint.SendAsync(urlBuilder.CollectionUrl(id, requestParams.queryParams), HttpMethod.Get, content);
             return await httpresult.Content.ReadAsStringAsync();
         }
 
@@ -63,9 +63,12 @@ namespace pocketbase.net.Services
 
             try
             {
-                return await GetResponse();
+                return await GetResponse(requestParams: new()
+                {
+                    queryParams = qParams
+                });
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
                 return "";
@@ -79,7 +82,7 @@ namespace pocketbase.net.Services
         /// </summary>
         /// <typeparam name="T">collection objects Type</typeparam>
         /// <returns></returns>
-        public async Task<Record<T>> GetFullList<T>(int BatchSize, RecordListQueryParams? queryParams = null) where T : PbBaseModel
+        public async Task<Record<T>> GetFullList<T>(int BatchSize = 100, RecordListQueryParams? queryParams = null) where T : PbBaseModel
         {
             var result = await GetFullList(BatchSize, queryParams);
             if (string.IsNullOrWhiteSpace(result))
@@ -122,7 +125,7 @@ namespace pocketbase.net.Services
                 Console.WriteLine(ex.Message);
                 return "";
             }
-            
+
         }
 
         /// <summary>
@@ -172,7 +175,7 @@ namespace pocketbase.net.Services
                 {"expand",queryParams.expand}
             };
 
-            return await GetResponse(requestParams: new(){queryParams=qParams});
+            return await GetResponse(requestParams: new() { queryParams = qParams });
         }
 
 
@@ -201,16 +204,16 @@ namespace pocketbase.net.Services
         /// <typeparam name="T">collection objects Type</typeparam>
         /// <returns></returns>
         public async Task<T> GetOne<T>(string id, string expand = "")
-            where T : class,new()
+            where T : class, new()
         {
             var result = await GetResponse(id, new()
             {
-                queryParams= new Dictionary<string, string>()
+                queryParams = new Dictionary<string, string>()
             {
                 {"expand",expand.ToString()}
             }
             });
-            return Deserialize<T>(result, PbJsonOptions.options)??new();
+            return Deserialize<T>(result, PbJsonOptions.options) ?? new();
         }
 
         /// <summary>
@@ -225,7 +228,7 @@ namespace pocketbase.net.Services
                 body = data,
                 method = HttpMethod.Post,
             });
-           return Deserialize<IDictionary<string,object>>(response)?? new Dictionary<string,object>();
+            return Deserialize<IDictionary<string, object>>(response) ?? new Dictionary<string, object>();
         }
 
         /// <summary>
@@ -236,14 +239,14 @@ namespace pocketbase.net.Services
         /// <typeparam name="D">Type of input object</typeparam>
         /// <returns></returns>
         public async Task<T> Create<T, D>(D data)
-            where T : class,new()
+            where T : class, new()
         {
             var response = await GetResponse(requestParams: new()
             {
                 body = data,
                 method = HttpMethod.Post,
             });
-            return (Deserialize<T>(response,PbJsonOptions.options))??new();
+            return (Deserialize<T>(response, PbJsonOptions.options)) ?? new();
         }
 
         /// <summary>
@@ -255,15 +258,15 @@ namespace pocketbase.net.Services
         /// <typeparam name="D">type of input object</typeparam>
         /// <returns></returns>
         public async Task<T> Update<T, D>(D data, string id)
-            where T : class,new()
+            where T : class, new()
         {
-            var response = await GetResponse(id,requestParams: new()
+            var response = await GetResponse(id, requestParams: new()
             {
-                body= data,
-                method= HttpMethod.Patch,
-            }    
+                body = data,
+                method = HttpMethod.Patch,
+            }
             );
-            return Deserialize<T>(response)??new();
+            return Deserialize<T>(response) ?? new();
         }
         /// <summary>
         /// Delete Record
@@ -276,7 +279,7 @@ namespace pocketbase.net.Services
             return result.StatusCode == HttpStatusCode.OK;
         }
 
-   
+
 
     }
 }

@@ -1,5 +1,8 @@
 ﻿namespace pocketbase.net.Models.Helpers
 {
+    /// <summary>
+    /// Schema of the fields of the Record
+    /// </summary>
     public class SchemaField
     {
         public string id { get; set; } = string.Empty;

@@ -2,6 +2,9 @@
 
 namespace pocketbase.net.Models
 {
+    /// <summary>
+    /// Class Represents the admin auth model
+    /// </summary>
     public class Admin : BaseModel
     {
         public string avatar { get; set; } = "0";

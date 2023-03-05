@@ -24,14 +24,15 @@ namespace pocketbase.net.Store
         }
 
         public dynamic model
-        { 
+        {
             get { return _model; }
-            internal set { 
+            internal set
+            {
                 _model = value;
             }
         }
 
-        public void Clear(Action<object, EventArgs>? callback = null)
+        internal void Clear(Action<object, EventArgs>? callback = null)
         {
             _token = "";
             isValid = false;

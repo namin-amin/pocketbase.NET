@@ -3,49 +3,28 @@
 @using System.Text.Json;
 @inject Pocketbase pb
 
-<PageTitle>Counter</PageTitle>
+<PageTitle>Posts</PageTitle>
 
-<h1>Counter</h1>
 
-<p role="status">Current count: @currentCount</p>
-
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
-
-<div>
-    <input type="text" @bind-value="usname" />
-    <input type="password" @bind-value="pwd" />
-    <button class="btn btn-primary" @onclick="Authtenticate">login</button>
-</div>
-
-<h2>@token</h2>
-
-@code {
-    private int currentCount = 0;
-    private string token = "";
-
-    private string usname = "";
-    private string pwd = "";
-
-    private void IncrementCount()
+@if (myposts is not null)
+{
+    @foreach (var post in myposts)
     {
-        currentCount++;
-    }
-
-    private async Task Authtenticate()
-    {
-        //var resp = await pb.Collections("users").AuthWithPassword(usname, pwd);
-        //var resp2 = await pb.Collections("posts").GetFullList();
-
-       var resp = await pb.admins.AuthWithPassword(usname, pwd);
-
-      // var t = 
-
-        token = pb.authStore.token;
-
-        var tt = await pb.collection.GetFullList();
-        Console.WriteLine(JsonSerializer.Serialize(tt,pocketbase.net.Helpers.PbJsonOptions.options));
+       <div class="container">
+        <h1>@post.test</h1>
+         
+        <h2>@post.post</h2>
+       </div>
     }
 }
+
+
+<style>
+    .container{
+        border: solid 1px lightgray;
+        margin: 2rem;
+        height: 4rem;
+        display: flex;
+        flex-direction: column;
+    }
+</style>
