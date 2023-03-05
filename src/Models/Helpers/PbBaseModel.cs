@@ -7,5 +7,8 @@
     {
         public string collectionId { get; set; } = string.Empty;
         public string collectionName { get; set; } = string.Empty;
+
+        public Dictionary<string, dynamic> expand { get; set; } = new();
+
     }
 }

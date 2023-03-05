@@ -18,8 +18,8 @@ namespace pocketbase.net.Services.Helpers
 
     public class RecordListQueryParams
     {
-        public int page = 0;
-        public int perPage = 0;
+        public int page = 1;
+        public int perPage = 30;
         public string sort = string.Empty;
         public string filter = string.Empty;
         public string expand = string.Empty;

@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using pocketbase.net.Helpers;
@@ -154,11 +155,11 @@ namespace pocketbase.net.Services
         }
 
 
-        public async Task<Record<T>?> GetFirstListItem<T>(string filter, RecordListQueryParams? queryParams = null)
+        public async Task<T?> GetFirstListItem<T>(string filter, RecordListQueryParams? queryParams = null)
         where T : PbBaseModel
         {
             var result = await GetFirstListItem(filter, queryParams);
-            return Deserialize<Record<T>>(result, PbJsonOptions.options);
+            return Deserialize<Record<T>>(result, PbJsonOptions.options)?.items.FirstOrDefault();
         }
 
         public async Task<string> GetFirstListItem(string filter, RecordListQueryParams? queryParams = null)

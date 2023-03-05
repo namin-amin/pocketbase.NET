@@ -1,10 +1,15 @@
-﻿using System.Net;
+﻿using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using pocketbase.net.Helpers;
 using pocketbase.net.Models.Helpers;
 using pocketbase.net.Services;
+using pocketbase.net.Services.Helpers;
 using pocketbase.net.Store;
 
 namespace pocketbase.net
@@ -120,6 +125,27 @@ namespace pocketbase.net
                 return new(HttpStatusCode.InternalServerError);
             }
 
+        }
+
+        public string GetFileUrl(PbBaseModel model,string fileName,FileQueryParams fileQueryParams = null)
+        {
+            fileQueryParams ??= new();
+            List<string> files = new List<string>();
+            files.Add("api");
+            files.Add("files");
+            files.Add(model.collectionId != "" ? model.collectionId : model.collectionName);
+            files.Add(model.id);
+            files.Add(fileName);
+
+            var url = baseurl + string.Join("/",files);
+            url = url.EndsWith("/")? url[..^1] :url;
+
+            url =  UrlBuilder.QueryBuilder(new Dictionary<string, string>()
+            {
+                { "thumb" , fileQueryParams.thumb }
+            },url);
+
+            return url;
         }
 
     }

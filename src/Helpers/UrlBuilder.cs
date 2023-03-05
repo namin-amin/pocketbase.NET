@@ -68,7 +68,7 @@ namespace pocketbase.net.Helpers
                     }
                 ).ToDictionary(s => s.Key.ToString(), s => s.Value.ToString()) ?? new();
 
-            return QueryHelpers.AddQueryString(baseUrl[^2..] == "/" ? baseUrl : baseUrl[..^1], queryDict);
+            return QueryHelpers.AddQueryString(baseUrl.EndsWith("/")==false ? baseUrl : baseUrl[..^1], queryDict);
 
         }
 

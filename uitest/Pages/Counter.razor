@@ -18,6 +18,28 @@
     }
 }
 
+<img src="@imageurl" alt="its a image"  />
+<button @onclick="getFileurll">get img</button>
+
+@code{
+    private string imageurl = "";
+
+    async private void getFileurll()
+    {
+        var det = await  pb.Collections("det").GetFirstListItem<Det>("when=1");
+        imageurl = pb.GetFileUrl(det, det.field);
+        StateHasChanged();
+
+    }
+
+    class Det : pocketbase.net.Models.Helpers.PbBaseModel
+    {
+        public bool deleted { get; set; }
+        public int when { get; set; }
+        public string field { get; set; } = "";
+    }
+}
+
 
 <style>
     .container{
