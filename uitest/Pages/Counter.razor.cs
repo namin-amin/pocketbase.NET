@@ -11,7 +11,8 @@ namespace uitest.Pages
 
         protected override async Task OnInitializedAsync()
         {
-            var result = await pb.Collections("posts").GetFullList<Posts>();
+            var result = await pb.Collections("todo").GetFullList<Posts>();
+            Console.WriteLine(result.items.ToList()[0].ToString());
             myposts = result.items.ToList();
             StateHasChanged();
         }

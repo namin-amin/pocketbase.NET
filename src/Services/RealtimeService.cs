@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -32,14 +33,14 @@ namespace pocketbase.net.Services
         /// </summary>
         /// <param name="topic">topic to subscribe to</param>
         /// <param name="callback">callback to be run when given topic has been altered</param>
-        public void Subscribe(string topic, Action<RealtimeEventArgs> callback)
+        public void Subscribe(string topic, Action<RealtimeEventArgs> callback,string collectioName)
         {
             if (string.IsNullOrWhiteSpace(topic))
             {
                 throw new Exception("topic needs to be set cannot be empty");
             }
 
-            topic = topic.ToLower();
+            topic = topic == "*" ? collectioName.ToLower() :topic.ToLower();
 
             if (subscriptions.Count == 0) //init new subscriptions and establish connections
             {
@@ -87,6 +88,7 @@ namespace pocketbase.net.Services
                               {
 
                                   Console.WriteLine(ex.Message);
+                                  Debug.WriteLine(ex.Message);
                               }
                               return Task.CompletedTask;
                           });
@@ -95,10 +97,12 @@ namespace pocketbase.net.Services
                 //await Task.Yield();
 
                 Console.WriteLine("runniong s");
+                Debug.WriteLine("runniong s");
             }
             catch (Exception ex)
             {
 
+                Debug.WriteLine(ex.Message);
                 Console.WriteLine(ex.Message);
             }
 
@@ -111,7 +115,7 @@ namespace pocketbase.net.Services
             using var client = new HttpClient();
             var request = new HttpRequestMessage(HttpMethod.Get, "stream")
             {
-                RequestUri = new Uri(baseUrl + "realtime")
+                RequestUri = new Uri(baseUrl + "/api/realtime")
             };
 
             request.SetBrowserResponseStreamingEnabled(true);
@@ -222,7 +226,8 @@ namespace pocketbase.net.Services
         /// <returns></returns>
         async void AddRemoveTopics()
         {
-            await _httpcleint.PostAsJsonAsync(baseUrl + "realtime", new
+           
+            await _httpcleint.PostAsJsonAsync(baseUrl + "/api/realtime", new
             {
                 clientId = _cleintId,
                 subscriptions = subscriptions.Keys.ToArray()

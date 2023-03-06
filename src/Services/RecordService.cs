@@ -32,7 +32,7 @@ namespace pocketbase.net.Services
         /// <param name="callbackFun">Action to be called when there is alterations in the given topic collection</param>
         public void Subscribe(string topic, Action<RealtimeEventArgs> callbackFun)
         {
-            realtimeService.Subscribe(topic, callbackFun);
+            realtimeService.Subscribe(topic, callbackFun,collectionName);
         }
 
         /// <summary>
