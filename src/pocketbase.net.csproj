@@ -16,7 +16,7 @@
     <PackageReadmeFile>Readme.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/namin-amin/pocketbase.NET</RepositoryUrl>
     <RepositoryType>github</RepositoryType>
-    <PackageReleaseNotes></PackageReleaseNotes>
+    <PackageReleaseNotes>seperated out Blazor support to seperate package</PackageReleaseNotes>
     <PackAsTool>False</PackAsTool>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
     <AssemblyVersion>0.1.0.2</AssemblyVersion>

@@ -7,7 +7,7 @@
 API's are Kept as similar as possible to [JS sdk](https://github.com/pocketbase/js-sdk) of pocketbase
 
 ```C#
-using pocketbase.net;
+using pocketbase.NET.blazor;
 
 var Pb =  new  Pocketbase("http://127.0.0.1:8090");
 
