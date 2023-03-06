@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using pocketbase.net.Models;
 using pocketbase.net.Models.Helpers;
 using uitest.Models;
 
@@ -9,12 +10,22 @@ namespace uitest.Pages
 
         public List<Posts> myposts { get; set; } = null;
 
-        protected override async Task OnInitializedAsync()
+        //protected override async Task OnInitializedAsync()
+        //{
+        //    var result = await pb.Collections("todo").GetFullList<Posts>();
+        //    Console.WriteLine(result.items.ToList()[0].ToString());
+        //    myposts = result.items.ToList();
+        //    StateHasChanged();
+        //}
+
+        public void sub()
         {
-            var result = await pb.Collections("todo").GetFullList<Posts>();
-            Console.WriteLine(result.items.ToList()[0].ToString());
-            myposts = result.items.ToList();
-            StateHasChanged();
+            pb.Collections("todo").Subscribe("todo",dothing);
+        }
+
+        private void dothing(RealtimeEventArgs obj)
+        {
+            Console.WriteLine(obj.data["record"].ToString());
         }
     }
 }

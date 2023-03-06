@@ -7,6 +7,7 @@ using pocketbase.net.Helpers;
 using pocketbase.net.Models.Helpers;
 using pocketbase.net.Services;
 using pocketbase.net.Services.Helpers;
+using pocketbase.net.Services.Interfaces;
 using pocketbase.net.Store;
 
 namespace pocketbase.net
@@ -23,7 +24,7 @@ namespace pocketbase.net
         public AdminService admins { get; set; }
 
         public BaseAuthStore authStore { get; set; }
-        private RealtimeService realtimeService { get; set; }
+        private IRealtimeServiceBase realtimeService { get; set; }
 
         public CollectionService collection { get; set; }
 
@@ -43,11 +44,33 @@ namespace pocketbase.net
             this.baseurl = baseurl.EndsWith("/") ? baseurl : baseurl + "/";
             this.httpClient.BaseAddress = new Uri(baseurl);
             this.lang = lang ?? "en-US";
-            realtimeService = new(baseurl, this.httpClient);
+            realtimeService = new RealtimeService( this.httpClient, baseurl);
             authStore = new();
             admins = new(this.httpClient, this);
             collection = new(this.httpClient, this);
         }
+
+        /// <summary>
+        /// Init Pocketbase Cleint
+        /// </summary>
+        /// <param name="baseurl">represents the baseurl of the Pocketbase server</param>
+        /// <param name="lang">Language Preference</param>
+        /// <param name="httpClient">Provide a HttpCleint to be used if already initialiased else pass null New one will be created</param>
+        public Pocketbase(string baseurl,
+                          string lang = "en-US",
+                          HttpClient? httpClient =  null,
+                          IRealtimeServiceBase? realtimeService =  null)
+        {
+            this.httpClient = httpClient ?? new HttpClient();
+            this.baseurl = baseurl.EndsWith("/") ? baseurl : baseurl + "/";
+            this.httpClient.BaseAddress = new Uri(baseurl);
+            this.lang = lang ?? "en-US";
+            this.realtimeService = realtimeService is null ? new RealtimeService(this.httpClient, baseurl):realtimeService;
+            authStore = new();
+            admins = new(this.httpClient, this);
+            collection = new(this.httpClient, this);
+        }
+
         /// <summary>
         /// Init Pocketbase Cleint
         /// </summary>
@@ -60,7 +83,7 @@ namespace pocketbase.net
             this.baseurl = baseurl.EndsWith("/") ? baseurl : baseurl + "/";
             this.httpClient.BaseAddress = new Uri(baseurl);
             this.lang = "en-US";
-            realtimeService = new(baseurl, this.httpClient);
+            realtimeService = new RealtimeService(this.httpClient, baseurl);
             authStore = new();
             admins = new(this.httpClient, this);
             collection = new(this.httpClient, this);

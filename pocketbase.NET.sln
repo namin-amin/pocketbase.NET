@@ -14,6 +14,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		test.http = test.http
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "pocketbase.NET.blazor", "pocketbase.NET.blazor\pocketbase.NET.blazor.csproj", "{E4C46BB1-A108-4F6A-8EA0-D9E4FCA67A89}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,6 +34,10 @@ Global
 		{3F578738-5109-43E0-AF45-BB09DC572754}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3F578738-5109-43E0-AF45-BB09DC572754}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3F578738-5109-43E0-AF45-BB09DC572754}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E4C46BB1-A108-4F6A-8EA0-D9E4FCA67A89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E4C46BB1-A108-4F6A-8EA0-D9E4FCA67A89}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E4C46BB1-A108-4F6A-8EA0-D9E4FCA67A89}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E4C46BB1-A108-4F6A-8EA0-D9E4FCA67A89}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

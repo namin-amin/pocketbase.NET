@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\pocketbase.net.csproj" />
+    <ProjectReference Include="..\pocketbase.NET.blazor\pocketbase.NET.blazor.csproj" />
   </ItemGroup>
 
 </Project>

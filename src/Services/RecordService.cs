@@ -4,18 +4,18 @@ using System.Threading.Tasks;
 using pocketbase.net.Helpers;
 using pocketbase.net.Models;
 using pocketbase.net.Models.Helpers;
-
+using pocketbase.net.Services.Interfaces;
 
 namespace pocketbase.net.Services
 {
     public class RecordService : BaseService
     {
-        internal RealtimeService realtimeService { get; }
+        internal IRealtimeServiceBase realtimeService { get; }
         internal BaseAuthService<RecordAuthModel> baseAuthService { get; }
         internal RecordService(
            HttpClient _httpClient,
            string collectionName,
-           RealtimeService realtimeService,
+           IRealtimeServiceBase realtimeService,
            Pocketbase cleint
        ) : base(_httpClient, collectionName, cleint)
         {

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using pocketbase.net;
+using pocketbase.NET.blazor;
 using uitest;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);

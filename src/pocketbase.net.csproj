@@ -8,7 +8,7 @@
     <RootNamespace>pocketbase.net</RootNamespace>
     <PackageTags>Cleint for pocktbase ; Blazorwebassembly support with realtime communications;</PackageTags>
     <Title>Pocketbase SDK for dotnet </Title>
-    <Version>0.01.1</Version>
+    <Version>0.01.2</Version>
     <Authors>namin-amin</Authors>
     <Company>-</Company>
     <Description>Pocketbase SDK for dotnet ,SDK designed inline with pocketbase js sdk</Description>
@@ -19,8 +19,8 @@
     <PackageReleaseNotes></PackageReleaseNotes>
     <PackAsTool>False</PackAsTool>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
-    <AssemblyVersion>0.1.0.1</AssemblyVersion>
-    <FileVersion>0.1.0.1</FileVersion>
+    <AssemblyVersion>0.1.0.2</AssemblyVersion>
+    <FileVersion>0.1.0.2</FileVersion>
   </PropertyGroup>
 
 
@@ -28,11 +28,10 @@
     <SupportedPlatform Include="browser" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
-    <PackageReference Include="System.Text.Json" Version="7.0.1" />
+    <PackageReference Include="System.Text.Json" Version="7.0.2" />
   </ItemGroup>
   <ItemGroup>
     <EditorConfigFiles Remove="D:\Projects\Pb\pocketbase.net\.editorconfig" />
