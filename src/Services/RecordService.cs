@@ -1,7 +1,5 @@
 using System.Net.Http;
-using System.Net.Http.Json;
 using System.Threading.Tasks;
-using pocketbase.net.Helpers;
 using pocketbase.net.Models;
 using pocketbase.net.Models.Helpers;
 using pocketbase.net.Services.Interfaces;
@@ -20,7 +18,7 @@ namespace pocketbase.net.Services
        ) : base(_httpClient, collectionName, cleint)
         {
             this.realtimeService = realtimeService;
-            this.baseAuthService =  new(_httpClient,collectionName,cleint);
+            baseAuthService = new(_httpClient, collectionName, cleint);
         }
 
 
@@ -32,7 +30,7 @@ namespace pocketbase.net.Services
         /// <param name="callbackFun">Action to be called when there is alterations in the given topic collection</param>
         public void Subscribe(string topic, Action<RealtimeEventArgs> callbackFun)
         {
-            realtimeService.Subscribe(topic, callbackFun,collectionName);
+            realtimeService.Subscribe(topic, callbackFun, collectionName);
         }
 
         /// <summary>
@@ -45,15 +43,42 @@ namespace pocketbase.net.Services
 
         public async Task<string> ListAuthMethods()
         {
-            return await _httpClient.GetStringAsync($"api/collections/{collectionName}/auth-methods");
+            try
+            {
+                return await _httpClient.GetStringAsync($"api/collections/{collectionName}/auth-methods");
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message.ToString());
+                return "";
+            }
         }
 
-        public async Task<RecordAuthModel> AuthWithPassword(
+        public async Task<RecordAuthModel?> AuthWithPassword(
            string email,
            string password
        )
         {
-            return await baseAuthService.AuthWithPassword(email, password,collectionName);
+            try
+            {
+                return await baseAuthService.AuthWithPassword(email, password, collectionName);
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message.ToString());
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Refresh currently authenticated users Auth details
+        /// </summary>
+        /// <returns></returns>
+        public async Task<RecordAuthModel> AuthRefresh()
+        {
+            return await baseAuthService.AuthRefresh();
         }
     }
 }

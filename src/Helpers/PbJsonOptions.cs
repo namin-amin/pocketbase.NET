@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Text.Json;
-
-namespace pocketbase.net.Helpers
+﻿namespace pocketbase.net.Helpers
 {
     /// <summary>
     /// Json options used in Pocketbase communicated json

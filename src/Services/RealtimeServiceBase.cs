@@ -1,7 +1,4 @@
-﻿using pocketbase.net.Models;
-using pocketbase.net.Services.Interfaces;
-using System.Diagnostics;
-using System.Diagnostics.Metrics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -9,12 +6,14 @@ using System.Net.Http.Json;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using pocketbase.net.Models;
+using pocketbase.net.Services.Interfaces;
 
 namespace pocketbase.net.Services
 {
-    public abstract class RealtimeServiceBase:IRealtimeServiceBase
+    public abstract class RealtimeServiceBase : IRealtimeServiceBase
     {
-        public  HttpClient _httpcleint;
+        public HttpClient _httpcleint;
         public string newLineChar { get; set; }
 
         public readonly Dictionary<string, List<Action<RealtimeEventArgs>>> subscriptions = new();
@@ -22,7 +21,8 @@ namespace pocketbase.net.Services
         public bool cancelled;
         public string baseUrl { get; set; }
 
-        public RealtimeServiceBase(HttpClient httpClient,string baseUrl) {
+        public RealtimeServiceBase(HttpClient httpClient, string baseUrl)
+        {
             this._httpcleint = httpClient;
             this.baseUrl = baseUrl;
             newLineChar = (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "\n" : Environment.NewLine);
@@ -141,7 +141,7 @@ namespace pocketbase.net.Services
         }
 
 
-       public async Task ReadSSEStream(HttpRequestMessage request)
+        public async Task ReadSSEStream(HttpRequestMessage request)
         {
 
             using var client = new HttpClient();
@@ -216,7 +216,7 @@ namespace pocketbase.net.Services
         /// <param name="data">Data read from the stream</param>
         public void ProcessEvents(string data)
         {
-            if (data=="")
+            if (data == "")
                 return;
 
             var val = data.Split(newLineChar);
@@ -229,7 +229,7 @@ namespace pocketbase.net.Services
             {
                 id = _cleintId,
                 @event = _event,
-                data = Deserialize<Dictionary<string, object>>(Data) ?? new()
+                data = Deserialize<Data>(Data) ?? new()
             };
 
             if (!string.IsNullOrWhiteSpace(_event) && _event == "PB_CONNECT")

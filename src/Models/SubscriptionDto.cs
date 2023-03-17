@@ -7,7 +7,20 @@ namespace pocketbase.net.Models
     {
         public string id { get; set; } = string.Empty;
         public string @event { get; set; } = string.Empty;//this rule violation not fixed as it conflicts with event keyword
-        public Dictionary<string, object> data { get; set; } = new();
+        //public Dictionary<string, object> data { get; set; } = new();
+
+        public Data data { get; set; } = new();
+
+        public override string ToString()
+        {
+            return Serialize(this.MemberwiseClone());
+        }
+    }
+
+    public class Data
+    {
+        public string action { get; set; } = "";
+        public Dictionary<string, object> record { get; set; } = new();
     }
 
     /// <summary>

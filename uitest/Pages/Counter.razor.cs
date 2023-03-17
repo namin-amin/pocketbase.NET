@@ -20,12 +20,14 @@ namespace uitest.Pages
 
         public void sub()
         {
-            pb.Collections("todo").Subscribe("todo",dothing);
+            pb.Collections("todo").Subscribe("todo", dothing);
+            pb.Collections("").
         }
 
         private void dothing(RealtimeEventArgs obj)
         {
-            Console.WriteLine(obj.data["record"].ToString());
+            Console.WriteLine(obj.ToString());
+            Console.WriteLine(obj.data.action);
         }
     }
 }
