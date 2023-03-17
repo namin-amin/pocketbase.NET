@@ -20,6 +20,8 @@
 *@
 <img src="@imageurl" alt="its a image"  />
 <button @onclick="sub">get img</button>
+<button @onclick="getmeth">get img</button>
+
 
 @code{
     private string imageurl = "";
@@ -30,6 +32,14 @@
         imageurl = pb.GetFileUrl(det, det.field);
         StateHasChanged();
 
+    }
+
+    async private void getmeth()
+    {
+        var det = await pb.Collections("todo").ListAuthMethods();
+        Console.WriteLine(det);
+        var dett = await pb.Collections("namin").GetFullList();
+        Console.WriteLine(dett);
     }
 
     class Det : pocketbase.net.Models.Helpers.PbBaseModel

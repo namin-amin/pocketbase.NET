@@ -45,7 +45,16 @@ namespace pocketbase.net.Services
 
         public async Task<string> ListAuthMethods()
         {
-            return await _httpClient.GetStringAsync($"api/collections/{collectionName}/auth-methods");
+            try
+            {
+                return await _httpClient.GetStringAsync($"api/collections/{collectionName}/auth-methods");
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return "";
+            }
         }
 
         public async Task<RecordAuthModel> AuthWithPassword(
