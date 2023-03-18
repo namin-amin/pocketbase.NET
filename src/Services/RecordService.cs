@@ -1,4 +1,5 @@
 using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using pocketbase.net.Models;
 using pocketbase.net.Models.Helpers;
@@ -79,6 +80,11 @@ namespace pocketbase.net.Services
         public async Task<RecordAuthModel> AuthRefresh()
         {
             return await baseAuthService.AuthRefresh();
+        }
+
+        public async Task<string> AuthWithOAuth2()
+        {
+
         }
     }
 }
