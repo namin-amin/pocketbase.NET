@@ -36,13 +36,17 @@ namespace pocketbase.net.Helpers
                 (overideColName == "" ? collectionType : "collections/") +
                 (overideColName == "" ? collectionName.ToLower() : overideColName.ToLower()) +
                 recordType + id;
-            return QueryBuilder(queryParams, baseUrl);
+            return UrlBuilderHelper.QueryBuilder(queryParams, baseUrl);
         }
         // public string CollectionUrl(string id = "")
         // {
         //     return collectionType + collectionName.ToLower() + recordType + id;
         // }
 
+    }
+
+    public static class UrlBuilderHelper
+    {
         /// <summary>
         /// Build query on the url provided
         /// </summary>
@@ -71,8 +75,5 @@ namespace pocketbase.net.Helpers
             return QueryHelpers.AddQueryString(baseUrl.EndsWith("/") == false ? baseUrl : baseUrl[..^1], queryDict);
 
         }
-
-
-
     }
 }

@@ -124,7 +124,7 @@ namespace pocketbase.net
         /// <param name="httpMethod">http method to be used</param>
         /// <param name="content">Content to be sent</param>
         /// <returns></returns>
-        public async Task<HttpResponseMessage> SendAsync(string url, HttpMethod httpMethod, StringContent? content = null)
+        public async Task<HttpResponseMessage> SendAsync(string url, HttpMethod httpMethod, StringContent? content = null, IDictionary<string, string>? headers = null)
         {
             try
             {
@@ -137,6 +137,15 @@ namespace pocketbase.net
                 if (content != null && httpMethod != HttpMethod.Get) message.Content = content;
                 if (authStore.token != "")
                     message.Headers.Authorization = new AuthenticationHeaderValue(authStore.token);
+
+                if (headers is not null)
+                {
+                    foreach (var header in headers)
+                    {
+                        message.Headers.Add(header.Key, header.Value);
+                    }
+                }
+
                 return await httpClient.SendAsync(message);
             }
             catch (Exception ex)
@@ -162,7 +171,7 @@ namespace pocketbase.net
             var url = baseurl + string.Join("/", files);
             url = url.EndsWith("/") ? url[..^1] : url;
 
-            url = UrlBuilder.QueryBuilder(new Dictionary<string, string>()
+            url = UrlBuilderHelper.QueryBuilder(new Dictionary<string, string>()
             {
                 { "thumb" , fileQueryParams.thumb }
             }, url);

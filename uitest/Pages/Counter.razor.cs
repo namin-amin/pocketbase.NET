@@ -21,7 +21,7 @@ namespace uitest.Pages
         public void sub()
         {
             pb.Collections("todo").Subscribe("todo", dothing);
-            pb.Collections("").
+            // pb.Collections("").
         }
 
         private void dothing(RealtimeEventArgs obj)

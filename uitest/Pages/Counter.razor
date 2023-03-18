@@ -21,6 +21,7 @@
 <img src="@imageurl" alt="its a image"  />
 <button @onclick="sub">get img</button>
 <button @onclick="getmeth">get img</button>
+<button @onclick="getreques">get img</button>
 
 
 @code{
@@ -32,6 +33,12 @@
         imageurl = pb.GetFileUrl(det, det.field);
         StateHasChanged();
 
+    }
+
+    async private void getreques()
+    {
+        var result = await pb.Collections("users").RequestVerification("test@gmail.com");
+        Console.WriteLine(result);
     }
 
     async private void getmeth()
