@@ -44,7 +44,7 @@ namespace pocketbase.net
             this.baseurl = baseurl.EndsWith("/") ? baseurl : baseurl + "/";
             this.httpClient.BaseAddress = new Uri(baseurl);
             this.lang = lang ?? "en-US";
-            realtimeService = new RealtimeService( this.httpClient, baseurl);
+            realtimeService = new RealtimeService(this.httpClient, baseurl);
             authStore = new();
             admins = new(this.httpClient, this);
             collection = new(this.httpClient, this);
@@ -58,14 +58,14 @@ namespace pocketbase.net
         /// <param name="httpClient">Provide a HttpCleint to be used if already initialiased else pass null New one will be created</param>
         public Pocketbase(string baseurl,
                           string lang = "en-US",
-                          HttpClient? httpClient =  null,
-                          IRealtimeServiceBase? realtimeService =  null)
+                          HttpClient? httpClient = null,
+                          IRealtimeServiceBase? realtimeService = null)
         {
             this.httpClient = httpClient ?? new HttpClient();
             this.baseurl = baseurl.EndsWith("/") ? baseurl : baseurl + "/";
             this.httpClient.BaseAddress = new Uri(baseurl);
             this.lang = lang ?? "en-US";
-            this.realtimeService = realtimeService is null ? new RealtimeService(this.httpClient, baseurl):realtimeService;
+            this.realtimeService = realtimeService is null ? new RealtimeService(this.httpClient, baseurl) : realtimeService;
             authStore = new();
             admins = new(this.httpClient, this);
             collection = new(this.httpClient, this);
@@ -147,23 +147,25 @@ namespace pocketbase.net
 
         }
 
-        public string GetFileUrl(PbBaseModel model,string fileName,FileQueryParams fileQueryParams = null)
+        public string GetFileUrl(PbBaseModel model, string fileName, FileQueryParams? fileQueryParams = null)
         {
             fileQueryParams ??= new();
-            List<string> files = new List<string>();
-            files.Add("api");
-            files.Add("files");
-            files.Add(model.collectionId != "" ? model.collectionId : model.collectionName);
-            files.Add(model.id);
-            files.Add(fileName);
+            List<string> files = new()
+            {
+                "api",
+                "files",
+                model.collectionId != "" ? model.collectionId : model.collectionName,
+                model.id,
+                fileName
+            };
 
-            var url = baseurl + string.Join("/",files);
-            url = url.EndsWith("/")? url[..^1] :url;
+            var url = baseurl + string.Join("/", files);
+            url = url.EndsWith("/") ? url[..^1] : url;
 
-            url =  UrlBuilder.QueryBuilder(new Dictionary<string, string>()
+            url = UrlBuilder.QueryBuilder(new Dictionary<string, string>()
             {
                 { "thumb" , fileQueryParams.thumb }
-            },url);
+            }, url);
 
             return url;
         }

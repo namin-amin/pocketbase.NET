@@ -1,15 +1,13 @@
 using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Text;
 using Microsoft.AspNetCore.Components.WebAssembly.Http;
 using pocketbase.net.Services;
 using pocketbase.net.Services.Interfaces;
 
 namespace pocketbase.net.Blazor
 {
-    public class RealtimeService : RealtimeServiceBase,IRealtimeServiceBase
+    public class RealtimeService : RealtimeServiceBase, IRealtimeServiceBase
     {
-        public RealtimeService(string baseUrl, HttpClient _httpcleint):base(_httpcleint ,baseUrl)
+        public RealtimeService(string baseUrl, HttpClient _httpcleint) : base(_httpcleint, baseUrl)
         {
 
         }

@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using pocketbase.net.Helpers;
@@ -89,7 +88,7 @@ namespace pocketbase.net.Services
         /// Refresh currently authenticated users Auth details
         /// </summary>
         /// <returns></returns>
-        public async Task<RecordAuthModel> Refresh()
+        public async Task<RecordAuthModel> AuthRefresh()
         {
             var data = await _httpClient.PostAsJsonAsync("admins", new
             {
@@ -185,6 +184,5 @@ namespace pocketbase.net.Services
             }
             return false;
         }
-
     }
 }
