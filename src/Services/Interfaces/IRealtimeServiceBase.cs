@@ -1,11 +1,10 @@
 ﻿using pocketbase.net.Models;
 
-namespace pocketbase.net.Services.Interfaces
+namespace pocketbase.net.Services.Interfaces;
+
+public interface IRealtimeServiceBase
 {
-    public interface IRealtimeServiceBase
-    {
-        void Dispose();
-        void Subscribe(string topic, Action<RealtimeEventArgs> callback, string collectioName);
-        void UnSubscribe(string topic);
-    }
+    void Dispose();
+    void Subscribe(string topic, Action<RealtimeEventArgs> callback, string collectioName);
+    void UnSubscribe(string topic);
 }

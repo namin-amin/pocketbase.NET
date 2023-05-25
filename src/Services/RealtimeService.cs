@@ -1,12 +1,11 @@
 ﻿using System.Net.Http;
 using pocketbase.net.Services.Interfaces;
 
-namespace pocketbase.net.Services
+namespace pocketbase.net.Services;
+
+internal class RealtimeService : RealtimeServiceBase, IRealtimeServiceBase
 {
-    internal class RealtimeService : RealtimeServiceBase, IRealtimeServiceBase
+    public RealtimeService(HttpClient httpClient, string baseUrl) : base(httpClient, baseUrl)
     {
-        public RealtimeService(HttpClient httpClient, string baseUrl) : base(httpClient, baseUrl)
-        {
-        }
     }
 }

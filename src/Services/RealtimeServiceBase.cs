@@ -9,237 +9,236 @@ using System.Threading.Tasks;
 using pocketbase.net.Models;
 using pocketbase.net.Services.Interfaces;
 
-namespace pocketbase.net.Services
+namespace pocketbase.net.Services;
+
+public abstract class RealtimeServiceBase : IRealtimeServiceBase
 {
-    public abstract class RealtimeServiceBase : IRealtimeServiceBase
+    public HttpClient _httpcleint;
+    public string newLineChar { get; set; }
+
+    public readonly Dictionary<string, List<Action<RealtimeEventArgs>>> subscriptions = new();
+    public string _cleintId = "";
+    public bool cancelled;
+    public string baseUrl { get; set; }
+
+    public RealtimeServiceBase(HttpClient httpClient, string baseUrl)
     {
-        public HttpClient _httpcleint;
-        public string newLineChar { get; set; }
+        this._httpcleint = httpClient;
+        this.baseUrl = baseUrl;
+        newLineChar = (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "\n" : Environment.NewLine);
+    }
 
-        public readonly Dictionary<string, List<Action<RealtimeEventArgs>>> subscriptions = new();
-        public string _cleintId = "";
-        public bool cancelled;
-        public string baseUrl { get; set; }
+    public void Dispose()
+    {
+        //Todo Disposable
+        //implement proper cancellation tockens
+        cancelled = true;
+    }
 
-        public RealtimeServiceBase(HttpClient httpClient, string baseUrl)
+    /// <summary>
+    /// Manages subscriptions based on topic
+    /// </summary>
+    /// <param name="topic">topic to subscribe to</param>
+    /// <param name="callback">callback to be run when given topic has been altered</param>
+    public void Subscribe(string topic, Action<RealtimeEventArgs> callback, string collectioName)
+    {
+        if (string.IsNullOrWhiteSpace(topic))
         {
-            this._httpcleint = httpClient;
-            this.baseUrl = baseUrl;
-            newLineChar = (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "\n" : Environment.NewLine);
+            throw new Exception("topic needs to be set cannot be empty");
         }
 
-        public void Dispose()
+        topic = topic == "*" ? collectioName.ToLower() : topic.ToLower();
+
+        if (subscriptions.Count == 0) //init new subscriptions and establish connections
         {
-            //Todo Disposable
-            //implement proper cancellation tockens
-            cancelled = true;
-        }
-
-        /// <summary>
-        /// Manages subscriptions based on topic
-        /// </summary>
-        /// <param name="topic">topic to subscribe to</param>
-        /// <param name="callback">callback to be run when given topic has been altered</param>
-        public void Subscribe(string topic, Action<RealtimeEventArgs> callback, string collectioName)
-        {
-            if (string.IsNullOrWhiteSpace(topic))
-            {
-                throw new Exception("topic needs to be set cannot be empty");
-            }
-
-            topic = topic == "*" ? collectioName.ToLower() : topic.ToLower();
-
-            if (subscriptions.Count == 0) //init new subscriptions and establish connections
-            {
-                //Todo here for each topic need call related callbacks
-                subscriptions.Add(topic, new List<Action<RealtimeEventArgs>>());
-                subscriptions[topic].Add(callback);
-                Dowork();
-
-            }
-            else if (subscriptions.TryGetValue(topic, out List<Action<RealtimeEventArgs>>? value))
-            {
-                value.Add(callback); //Add new callback to existing topic
-            }
-            else
-            {
-                subscriptions.Add(topic, new List<Action<RealtimeEventArgs>>());
-                subscriptions[topic].Add(callback);
-                AddRemoveTopics();
-            }
+            //Todo here for each topic need call related callbacks
+            subscriptions.Add(topic, new List<Action<RealtimeEventArgs>>());
+            subscriptions[topic].Add(callback);
+            Dowork();
 
         }
-
-        /// <summary>
-        /// unsubscribe from the given topic
-        /// </summary>
-        /// <param name="topic">Topic name or , can use * to remove all subscriptions</param>
-        public void UnSubscribe(string topic)
+        else if (subscriptions.TryGetValue(topic, out List<Action<RealtimeEventArgs>>? value))
         {
-            if (topic == "*")
-            {
-                subscriptions.Clear();
-                AddRemoveTopics();
-                Dispose();
-            }
-            else
-            {
-                subscriptions.Remove(topic);
-            }
+            value.Add(callback); //Add new callback to existing topic
+        }
+        else
+        {
+            subscriptions.Add(topic, new List<Action<RealtimeEventArgs>>());
+            subscriptions[topic].Add(callback);
+            AddRemoveTopics();
         }
 
-        /// <summary>
-        /// Communicate with the server to subscribe or unsubscribe to topics
-        /// </summary>
-        /// <returns></returns>
-        public async void AddRemoveTopics()
-        {
+    }
 
-            await _httpcleint.PostAsJsonAsync(baseUrl + "/api/realtime", new
-            {
-                clientId = _cleintId,
-                subscriptions = subscriptions.Keys.ToArray()
-            });
+    /// <summary>
+    /// unsubscribe from the given topic
+    /// </summary>
+    /// <param name="topic">Topic name or , can use * to remove all subscriptions</param>
+    public void UnSubscribe(string topic)
+    {
+        if (topic == "*")
+        {
+            subscriptions.Clear();
+            AddRemoveTopics();
+            Dispose();
         }
-
-        public void ProcessCallBacks(RealtimeEventArgs args)
+        else
         {
-            subscriptions[args.@event].ForEach((clb) => clb.Invoke(args));
+            subscriptions.Remove(topic);
         }
+    }
 
-        public virtual void Dowork()
+    /// <summary>
+    /// Communicate with the server to subscribe or unsubscribe to topics
+    /// </summary>
+    /// <returns></returns>
+    public async void AddRemoveTopics()
+    {
+
+        await _httpcleint.PostAsJsonAsync(baseUrl + "/api/realtime", new
         {
-            try
-            {
-                _ = Task.Run(async () =>
-                {
-                    try
-                    {
-                        var request = new HttpRequestMessage(HttpMethod.Get, "stream")
-                        {
-                            RequestUri = new Uri(baseUrl + "/api/realtime")
-                        };
+            clientId = _cleintId,
+            subscriptions = subscriptions.Keys.ToArray()
+        });
+    }
 
-                        await ReadSSEStream(request);
-                    }
-                    catch (Exception ex)
-                    {
+    public void ProcessCallBacks(RealtimeEventArgs args)
+    {
+        subscriptions[args.@event].ForEach((clb) => clb.Invoke(args));
+    }
 
-                        Console.WriteLine(ex.Message);
-                        Debug.WriteLine(ex.Message);
-                    }
-                    return Task.CompletedTask;
-                });
-                ;
-            }
-            catch (Exception ex)
-            {
-
-                Debug.WriteLine(ex.Message);
-                Console.WriteLine(ex.Message);
-            }
-        }
-
-
-        public async Task ReadSSEStream(HttpRequestMessage request)
+    public virtual void Dowork()
+    {
+        try
         {
-
-            using var client = new HttpClient();
-
-            var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
-            bool prevNewLine = false;
-            var _responseContent = "";
-
-            Stream? stream = null;
-            byte[] bytes = new byte[1];
-            var newlineChar = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "\n" : Environment.NewLine;
-
-            while (!cancelled)
+            _ = Task.Run(async () =>
             {
                 try
                 {
-                    stream = await response.Content.ReadAsStreamAsync();
-
-                    if (stream.CanRead)
+                    var request = new HttpRequestMessage(HttpMethod.Get, "stream")
                     {
-                        await stream.ReadAsync(bytes);
-                        string? letter = Encoding.UTF8.GetString(bytes);
-                        _responseContent += letter;
+                        RequestUri = new Uri(baseUrl + "/api/realtime")
+                    };
 
-
-                        if (letter == newlineChar && prevNewLine == true)
-                        {
-                            _responseContent = _responseContent[..^2];
-
-                            ProcessEvents(_responseContent);
-                            _responseContent = string.Empty;
-                            prevNewLine = false;
-                            await Task.Delay(TimeSpan.FromMilliseconds(100));
-                        }
-                        else if (letter == newlineChar && prevNewLine == false)
-                        {
-                            prevNewLine = true;
-                        }
-                        else
-                        {
-                            prevNewLine = false;
-                        }
-                    }
-                    else
-                    {
-                        break;
-                    }
-
-
+                    await ReadSSEStream(request);
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error: {ex.Message}");
-                    Console.WriteLine("Retrying in 5 seconds");
-                    await Task.Delay(TimeSpan.FromSeconds(5));
+
+                    Console.WriteLine(ex.Message);
+                    Debug.WriteLine(ex.Message);
+                }
+                return Task.CompletedTask;
+            });
+            ;
+        }
+        catch (Exception ex)
+        {
+
+            Debug.WriteLine(ex.Message);
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+
+    public async Task ReadSSEStream(HttpRequestMessage request)
+    {
+
+        using var client = new HttpClient();
+
+        var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+        bool prevNewLine = false;
+        var _responseContent = "";
+
+        Stream? stream = null;
+        byte[] bytes = new byte[1];
+        var newlineChar = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "\n" : Environment.NewLine;
+
+        while (!cancelled)
+        {
+            try
+            {
+                stream = await response.Content.ReadAsStreamAsync();
+
+                if (stream.CanRead)
+                {
+                    await stream.ReadAsync(bytes);
+                    string? letter = Encoding.UTF8.GetString(bytes);
+                    _responseContent += letter;
+
+
+                    if (letter == newlineChar && prevNewLine == true)
+                    {
+                        _responseContent = _responseContent[..^2];
+
+                        ProcessEvents(_responseContent);
+                        _responseContent = string.Empty;
+                        prevNewLine = false;
+                        await Task.Delay(TimeSpan.FromMilliseconds(100));
+                    }
+                    else if (letter == newlineChar && prevNewLine == false)
+                    {
+                        prevNewLine = true;
+                    }
+                    else
+                    {
+                        prevNewLine = false;
+                    }
+                }
+                else
+                {
+                    break;
                 }
 
-            }
 
-            if (stream is not null)
+            }
+            catch (Exception ex)
             {
-                stream.Close();
-                await stream.DisposeAsync();
+                Console.WriteLine($"Error: {ex.Message}");
+                Console.WriteLine("Retrying in 5 seconds");
+                await Task.Delay(TimeSpan.FromSeconds(5));
             }
 
-            client.CancelPendingRequests();
         }
 
-        /// <summary>
-        /// After reading stream the returened data is processed and required operations are done
-        /// </summary>
-        /// <param name="data">Data read from the stream</param>
-        public void ProcessEvents(string data)
+        if (stream is not null)
         {
-            if (data == "")
-                return;
+            stream.Close();
+            await stream.DisposeAsync();
+        }
 
-            var val = data.Split(newLineChar);
-            if (string.IsNullOrWhiteSpace(_cleintId)) _cleintId = val[0].Split(":")[1];
+        client.CancelPendingRequests();
+    }
 
-            var _event = val[1].Split(":")[1];
-            var Data = val[2][(val[2].IndexOf(":") + 1)..];
+    /// <summary>
+    /// After reading stream the returened data is processed and required operations are done
+    /// </summary>
+    /// <param name="data">Data read from the stream</param>
+    public void ProcessEvents(string data)
+    {
+        if (data == "")
+            return;
 
-            var args = new RealtimeEventArgs()
-            {
-                id = _cleintId,
-                @event = _event,
-                data = Deserialize<Data>(Data) ?? new()
-            };
+        var val = data.Split(newLineChar);
+        if (string.IsNullOrWhiteSpace(_cleintId)) _cleintId = val[0].Split(":")[1];
 
-            if (!string.IsNullOrWhiteSpace(_event) && _event == "PB_CONNECT")
-            {
-                AddRemoveTopics();
-            }
-            else
-            {
-                ProcessCallBacks(args);
-            }
+        var _event = val[1].Split(":")[1];
+        var Data = val[2][(val[2].IndexOf(":") + 1)..];
+
+        var args = new RealtimeEventArgs()
+        {
+            id = _cleintId,
+            @event = _event,
+            data = Deserialize<Data>(Data) ?? new()
+        };
+
+        if (!string.IsNullOrWhiteSpace(_event) && _event == "PB_CONNECT")
+        {
+            AddRemoveTopics();
+        }
+        else
+        {
+            ProcessCallBacks(args);
         }
     }
 }
