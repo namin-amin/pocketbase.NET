@@ -132,7 +132,7 @@ public class CollectionService
             collectionModels = collectionModels,
             deleteMissiong = deleteMissiong
         }, PbJsonOptions.options);
-        await _baseService._httpClient.PutAsync("/api/collections/import", new StringContent(result) { });
+        await _baseService.HttpClient.PutAsync("/api/collections/import", new StringContent(result) { });
     }
     class ImportModel
     {

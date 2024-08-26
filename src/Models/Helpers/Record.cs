@@ -7,9 +7,9 @@
 public class Record<T> : BaseRecord
     where T : PbBaseModel
 {
-    public int totalPages { get; set; }
+    public int totalPages { get; init; }
 
-    public IEnumerable<T> items { get; set; } = new List<T>();
+    public IEnumerable<T> items { get; init; } = new List<T>();
 }
 
 /// <summary>
@@ -19,9 +19,9 @@ public class Record<T> : BaseRecord
 public class ColRecord<T> : BaseRecord
     where T : BaseModel
 {
-    public int totalPages { get; set; }
+    public int totalPages { get; init; }
 
-    public IEnumerable<T> items { get; set; } = new List<T>();
+    public IEnumerable<T> items { get; init; } = new List<T>();
 }
 
 public class Record : BaseRecord
@@ -32,7 +32,7 @@ public class Record : BaseRecord
 
 public class AdminRecord : BaseRecord
 {
-    public IEnumerable<RecordAuthModel> items { get; set; } = new List<RecordAuthModel>();
+    public IEnumerable<RecordAuthModel> items { get; init; } = new List<RecordAuthModel>();
 }
 public abstract class BaseRecord
 {

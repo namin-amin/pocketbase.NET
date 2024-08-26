@@ -31,8 +31,8 @@ public class BaseAuthStore
         _token = "";
         isValid = false;
         //?How to format the eventargs?
-        callback?.Invoke(this, new EventArgs());
-        Onchange?.Invoke(this, new EventArgs());
+        callback?.Invoke(this, EventArgs.Empty);
+        Onchange?.Invoke(this, EventArgs.Empty);
     }
 
 }

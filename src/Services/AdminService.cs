@@ -9,7 +9,7 @@ namespace pocketbase.net.Services;
 /// </summary>
 public class AdminService : BaseAuthService<Admin>
 {
-    public AdminService(HttpClient httpClient, Pocketbase cleint) : base(httpClient, "admins", cleint)
+    public AdminService(HttpClient httpClient, Pocketbase client) : base(httpClient, "admins", client)
     {
     }
 }

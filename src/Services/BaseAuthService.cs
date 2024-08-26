@@ -15,7 +15,7 @@ public class BaseAuthService<T> : BaseService
 {
 
 
-    public BaseAuthService(HttpClient httpClient, string collectionName, Pocketbase cleint) : base(httpClient, collectionName, cleint)
+    public BaseAuthService(HttpClient httpClient, string collectionName, Pocketbase client) : base(httpClient, collectionName, client)
     {
     }
 
@@ -33,10 +33,10 @@ public class BaseAuthService<T> : BaseService
         string url = ""
     )
     {
-        url = url == "" ? urlBuilder.CollectionUrl() : urlBuilder.CollectionUrl(overideColName: url);
+        url = url == "" ? UrlBuilder.CollectionUrl() : UrlBuilder.CollectionUrl(overideColName: url);
         url += "/auth-with-password";
 
-        var response = await _httpClient.PostAsJsonAsync(
+        var response = await HttpClient.PostAsJsonAsync(
           url, new
           {
               identity = email,
@@ -52,13 +52,13 @@ public class BaseAuthService<T> : BaseService
 
         if (data.TryGetValue("token", out object? value))
         {
-            cleint.authStore.token = value?.ToString()!;
+            Client.authStore.token = value?.ToString()!;
             if (data.TryGetValue("admin", out object? admin))
             {
                 try
                 {
-                    cleint.authStore.model = Deserialize<T>(admin?.ToString() ?? "", PbJsonOptions.options) ?? new();
-                    return cleint.authStore.model;
+                    Client.authStore.model = Deserialize<T>(admin?.ToString() ?? "", PbJsonOptions.options) ?? new();
+                    return Client.authStore.model;
                 }
                 catch (Exception ex)
                 {
@@ -70,8 +70,8 @@ public class BaseAuthService<T> : BaseService
             {
                 try
                 {
-                    cleint.authStore.model = Deserialize<T>(record?.ToString() ?? "", PbJsonOptions.options) ?? new();
-                    return cleint.authStore.model;
+                    Client.authStore.model = Deserialize<T>(record?.ToString() ?? "", PbJsonOptions.options) ?? new();
+                    return Client.authStore.model;
                 }
                 catch (Exception ex)
                 {
@@ -90,9 +90,9 @@ public class BaseAuthService<T> : BaseService
     /// <returns></returns>
     public async Task<RecordAuthModel> AuthRefresh()
     {
-        var data = await _httpClient.PostAsJsonAsync("admins", new
+        var data = await HttpClient.PostAsJsonAsync("admins", new
         {
-            Authorization = cleint.authStore.token
+            Authorization = Client.authStore.token
         });
 
 
@@ -135,13 +135,13 @@ public class BaseAuthService<T> : BaseService
         )
     {
 
-        var data = await _httpClient.PostAsJsonAsync("admins", new
+        var data = await HttpClient.PostAsJsonAsync("admins", new
         {
             email,
             password,
             passwordConfirm,
             avatar,
-            Authorization = cleint.authStore.token
+            Authorization = Client.authStore.token
         });
 
 
@@ -155,10 +155,10 @@ public class BaseAuthService<T> : BaseService
 
     public async Task<bool> RequestPasswordReset(string email)
     {
-        var data = await _httpClient.PostAsJsonAsync("admins/request-password-reset", new
+        var data = await HttpClient.PostAsJsonAsync("admins/request-password-reset", new
         {
             email,
-            Authorization = cleint.authStore.token
+            Authorization = Client.authStore.token
         });
 
         if (data.StatusCode == System.Net.HttpStatusCode.OK)
@@ -170,12 +170,12 @@ public class BaseAuthService<T> : BaseService
 
     public async Task<bool> ConfirmPasswordReset(string email, string password, string passwordConfirm)
     {
-        var data = await _httpClient.PostAsJsonAsync("admins/confirm-password-reset", new
+        var data = await HttpClient.PostAsJsonAsync("admins/confirm-password-reset", new
         {
             email,
             password,
             passwordConfirm,
-            Authorization = cleint.authStore.token
+            Authorization = Client.authStore.token
         });
 
         if (data.StatusCode == System.Net.HttpStatusCode.OK)

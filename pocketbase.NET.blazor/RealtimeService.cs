@@ -7,14 +7,14 @@ namespace pocketbase.net.Blazor
 {
     public class RealtimeService : RealtimeServiceBase, IRealtimeServiceBase
     {
-        public RealtimeService(string baseUrl, HttpClient _httpcleint) : base(_httpcleint, baseUrl)
+        public RealtimeService(string baseUrl, HttpClient httpClient) : base(httpClient, baseUrl)
         {
 
         }
         public override void Dowork()
         {
             try
-            {
+            { //TODO implement proper error handling here and expose that
                 _ = Task.Run(async () =>
                           {
                               try
@@ -34,8 +34,7 @@ namespace pocketbase.net.Blazor
                                   Debug.WriteLine(ex.Message);
                               }
                               return Task.CompletedTask;
-                          });
-                ;
+                          });;
 
             }
             catch (Exception ex)
@@ -44,8 +43,6 @@ namespace pocketbase.net.Blazor
                 Debug.WriteLine(ex.Message);
                 Console.WriteLine(ex.Message);
             }
-
-
         }
     }
 }

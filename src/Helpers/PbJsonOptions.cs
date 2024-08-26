@@ -5,14 +5,12 @@
 /// </summary>
 public static class PbJsonOptions
 {
-    private static JsonSerializerOptions Options = new()
+    public static JsonSerializerOptions options { get; private set; } = new()
     {
         Converters =
         {
-           new JsonDateTimeConverter()
+            new JsonDateTimeConverter()
         },
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
     };
-
-    public static JsonSerializerOptions options { get => Options; private set => Options = value; }
 }

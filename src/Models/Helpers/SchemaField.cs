@@ -3,7 +3,7 @@
 /// <summary>
 /// Schema of the fields of the Record
 /// </summary>
-public class SchemaField
+public abstract class SchemaField
 {
     public string id { get; set; } = string.Empty;
     public string name { get; set; } = string.Empty;

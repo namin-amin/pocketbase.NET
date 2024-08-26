@@ -223,7 +223,7 @@ public abstract class RealtimeServiceBase : IRealtimeServiceBase
         if (string.IsNullOrWhiteSpace(_cleintId)) _cleintId = val[0].Split(":")[1];
 
         var _event = val[1].Split(":")[1];
-        var Data = val[2][(val[2].IndexOf(":") + 1)..];
+        var Data = val[2][(val[2].IndexOf(":", StringComparison.Ordinal) + 1)..];
 
         var args = new RealtimeEventArgs()
         {

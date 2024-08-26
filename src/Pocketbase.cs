@@ -13,13 +13,13 @@ using pocketbase.net.Store;
 namespace pocketbase.net;
 
 /// <summary>
-/// Represents the Cleint 
+/// Represents the Client 
 /// </summary>
 public class Pocketbase
 {
     private HttpClient httpClient { get; }
 
-    private readonly Dictionary<string, RecordService> RecordCollection = new();
+    private readonly Dictionary<string, RecordService> _recordCollection = new();
 
     public AdminService admins { get; set; }
 
@@ -31,13 +31,13 @@ public class Pocketbase
     public string baseurl { get; set; }
     public string lang { get; set; }
     /// <summary>
-    /// Init Pocketbase Cleint
+    /// Init Pocketbase Client
     /// </summary>
     /// <param name="baseurl">represents the baseurl of the Pocketbase server</param>
     /// <param name="lang">Language Preference</param>
-    /// <param name="httpClient">Provide a HttpCleint to be used if already initialiased else pass null New one will be created</param>
+    /// <param name="httpClient">Provide a HttpClient to be used if already initialized else pass null New one will be created</param>
     public Pocketbase(string baseurl,
-                      string lang,
+                      string? lang,
                       HttpClient? httpClient)
     {
         this.httpClient = httpClient ?? new HttpClient();
@@ -56,6 +56,7 @@ public class Pocketbase
     /// <param name="baseurl">represents the baseurl of the Pocketbase server</param>
     /// <param name="lang">Language Preference</param>
     /// <param name="httpClient">Provide a HttpCleint to be used if already initialiased else pass null New one will be created</param>
+    /// <param name="realtimeService"></param>
     public Pocketbase(string baseurl,
                       string lang = "en-US",
                       HttpClient? httpClient = null,
@@ -65,7 +66,7 @@ public class Pocketbase
         this.baseurl = baseurl.EndsWith("/") ? baseurl : baseurl + "/";
         this.httpClient.BaseAddress = new Uri(baseurl);
         this.lang = lang ?? "en-US";
-        this.realtimeService = realtimeService is null ? new RealtimeService(this.httpClient, baseurl) : realtimeService;
+        this.realtimeService = realtimeService ?? new RealtimeService(this.httpClient, baseurl);
         authStore = new();
         admins = new(this.httpClient, this);
         collection = new(this.httpClient, this);
@@ -75,7 +76,7 @@ public class Pocketbase
     /// Init Pocketbase Cleint
     /// </summary>
     /// <param name="baseurl">represents the baseurl of the Pocketbase server</param>
-    /// <param name="httpClient">Provide a HttpCleint to be used if already initialiased else pass null New one will be created</param>
+    /// <param name="httpClient">Provide a HttpClient to be used if already initialized else pass null New one will be created</param>
     public Pocketbase(string baseurl,
                      HttpClient? httpClient)
     {
@@ -89,30 +90,24 @@ public class Pocketbase
         collection = new(this.httpClient, this);
     }
 
-    void FumSerivce(object? o, EventArgs e)
-    {
-        Console.WriteLine("test");
-    }
-
-
     // public BaseAuthStore AuthStore { get; set; }
 
     /// <summary>
     /// Returns the Collection object that can be used to do CRUD and Subscriptions
     /// </summary>
-    /// <param name="collectionname">Name of the collection to get</param>
+    /// <param name="collectionName">Name of the collection to get</param>
     /// <returns></returns>
-    public RecordService Collections(string collectionname)
+    public RecordService Collections(string collectionName)
     {
         RecordService? collectionService;
-        if (RecordCollection.ContainsKey(collectionname))
+        if (_recordCollection.TryGetValue(collectionName, out var value))
         {
-            collectionService = RecordCollection[collectionname];
+            collectionService = value;
             return collectionService;
         }
 
-        collectionService = new(httpClient, collectionname, realtimeService, this);
-        RecordCollection.Add(collectionname, collectionService);
+        collectionService = new(httpClient, collectionName, realtimeService, this);
+        _recordCollection.Add(collectionName, collectionService);
         return collectionService;
     }
 
@@ -123,8 +118,12 @@ public class Pocketbase
     /// <param name="url">url to connect and send with details of operation</param>
     /// <param name="httpMethod">http method to be used</param>
     /// <param name="content">Content to be sent</param>
+    /// <param name="headers"></param>
     /// <returns></returns>
-    public async Task<HttpResponseMessage> SendAsync(string url, HttpMethod httpMethod, StringContent? content = null, IDictionary<string, string>? headers = null)
+    public async Task<HttpResponseMessage> SendAsync(string url, 
+                                                        HttpMethod httpMethod, 
+                                                        StringContent? content = null, 
+                                                        IDictionary<string, string>? headers = null)
     {
         try
         {
@@ -138,12 +137,14 @@ public class Pocketbase
             if (authStore.token != "")
                 message.Headers.Authorization = new AuthenticationHeaderValue(authStore.token);
 
-            if (headers is not null)
+            if (headers is null)
             {
-                foreach (var header in headers)
-                {
-                    message.Headers.Add(header.Key, header.Value);
-                }
+                return await httpClient.SendAsync(message);
+            }
+
+            foreach (var header in headers)
+            {
+                message.Headers.Add(header.Key, header.Value);
             }
 
             return await httpClient.SendAsync(message);
@@ -188,18 +189,15 @@ public static class PocketBaseProvider
     /// </summary>
     /// <param name="services"></param>
     /// <param name="baseUrl">represents the baseurl of the Pocketbase server</param>
-    /// <param name="httpClient">Provide a HttpCleint to be used if already initialiased else pass null New one will be created</param>
+    /// <param name="httpClient">Provide a HttpClient to be used if already initialized else pass null New one will be created</param>
     /// <param name="lang">Language Preference</param>
     /// <returns></returns>
-    public static IServiceCollection AddPocketbase(this IServiceCollection services, string baseUrl, HttpClient? httpClient, string lang = "en-US")
+    public static IServiceCollection AddPocketbase(this IServiceCollection services, string baseUrl, HttpClient? httpClient, string? lang = "en-US")
     {
 
         //return services.AddSingleton<Pocketbase>(new Pocketbase(baseUrl,lang));
 
-        return services.AddSingleton((options) =>
-        {
-            return new Pocketbase(baseUrl, lang, httpClient);
-        });
+        return services.AddSingleton((options) => new Pocketbase(baseUrl, lang, httpClient));
     }
 
 
@@ -209,12 +207,9 @@ public static class PocketBaseProvider
     /// <param name="services"></param>
     /// <param name="baseUrl">represents the baseurl of the Pocketbase server</param>
     /// <param name="lang">Language Preference</param>
-    public static IServiceCollection AddPocketbase(this IServiceCollection services, string baseUrl, string lang = "en-US")
+    public static IServiceCollection AddPocketbase(this IServiceCollection services, string baseUrl, string? lang = "en-US")
     {
 
-        return services.AddSingleton((options) =>
-        {
-            return new Pocketbase(baseUrl, lang, new HttpClient());
-        });
+        return services.AddSingleton((options) => new Pocketbase(baseUrl, lang, new HttpClient()));
     }
 }

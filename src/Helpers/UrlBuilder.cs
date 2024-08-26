@@ -5,9 +5,8 @@ namespace pocketbase.net.Helpers;
 
 public class UrlBuilder
 {
-
-    public string collectionType { get; set; } = string.Empty;
-    public string recordType { get; set; } = string.Empty;
+    private string collectionType { get; set; } = string.Empty;
+    private string recordType { get; set; } = string.Empty;
     public UrlBuilder(string collectionName)
     {
         this.collectionName = collectionName;
@@ -22,12 +21,14 @@ public class UrlBuilder
             this.recordType = "";
         };
     }
-    private string collectionName { get; set; } = string.Empty;
+    private string collectionName { get; set; }
 
     /// <summary>
     /// builds the request url for records
     /// </summary>
-    /// <param name="id">collection/record id to which requestto be made</param>
+    /// <param name="id">collection/record id to which request be made</param>
+    /// <param name="queryParams"></param>
+    /// <param name="overideColName"></param>
     /// <returns></returns>
     public string CollectionUrl(string id = "", IDictionary<string, string>? queryParams = null, string overideColName = "")
     {
@@ -58,21 +59,10 @@ public static class UrlBuilderHelper
         if (queryParams is null) return baseUrl;
 
         var queryDict = queryParams
-            ?.Where(
-                c =>
-                {
-                    {
-                        if (c.Value != null)
-                            if (c.Value?.ToString() != string.Empty)
-                            {
-                                return true;
-                            }
-                    }
-                    return false;
-                }
-            ).ToDictionary(s => s.Key.ToString(), s => s.Value.ToString()) ?? new();
+            ?.Where(c => c.Value?.ToString() != string.Empty)
+            .ToDictionary(s => s.Key.ToString(), s => s.Value.ToString()) 
+                        ?? new Dictionary<string, string>();
 
         return QueryHelpers.AddQueryString(baseUrl.EndsWith("/") == false ? baseUrl : baseUrl[..^1], queryDict);
-
     }
 }

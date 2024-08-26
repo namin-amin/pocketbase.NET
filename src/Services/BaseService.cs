@@ -9,27 +9,27 @@ using pocketbase.net.Services.Helpers;
 namespace pocketbase.net.Services;
 
 /// <summary>
-/// Base Service class defines all the basic operatins that a Service class shud be doing
+/// Base Service class defines all the basic operations that a Service class should be doing
 /// </summary>
 public class BaseService
 {
-    internal Pocketbase cleint;
-    internal readonly HttpClient _httpClient;
-    public readonly string collectionName;
+    internal readonly Pocketbase Client;
+    internal readonly HttpClient HttpClient;
+    public readonly string CollectionName;
 
-    public readonly UrlBuilder urlBuilder;
+    public readonly UrlBuilder UrlBuilder;
 
 
     public BaseService(HttpClient httpClient,
-                       string collectionName, Pocketbase cleint)
+                       string collectionName, Pocketbase client)
     {
-        this.collectionName = collectionName;
-        _httpClient = httpClient;
-        urlBuilder = new UrlBuilder(collectionName);
-        this.cleint = cleint;
+        this.CollectionName = collectionName;
+        HttpClient = httpClient;
+        UrlBuilder = new UrlBuilder(collectionName);
+        this.Client = client;
     }
 
-    internal async Task<string> GetResponse(string id = "", RequestParams? requestParams = null)
+    private async Task<string> GetResponse(string id = "", RequestParams? requestParams = null)
     {
         StringContent? content = null;
         requestParams ??= new RequestParams();
@@ -39,24 +39,24 @@ public class BaseService
             content = new StringContent(Serialize(requestParams.body, PbJsonOptions.options));
         }
 
-        var httpresult = await cleint.SendAsync(urlBuilder.CollectionUrl(id, requestParams.queryParams), HttpMethod.Get, content);
-        return await httpresult.Content.ReadAsStringAsync();
+        var httpResult = await Client.SendAsync(UrlBuilder.CollectionUrl(id, requestParams.queryParams), HttpMethod.Get, content);
+        return await httpResult.Content.ReadAsStringAsync();
     }
 
     /// <summary>
-    /// Gets Record response from PoccketBase
+    /// Gets List of Record response from PocketBase
     /// </summary>
-    /// <param name="collectionName">name of the collection to be queried</param>
-    /// <param name="id">If getting single record then required  id</param>
+    /// <param name="batchSize">number of items to be fetched </param>
+    /// <param name="queryParams">filtering query params</param>
     /// <returns>Response schema based on the type of response</returns>
-    public async Task<string> GetFullList(int BatchSize = 100, RecordListQueryParams? queryParams = null)
+    public async Task<string> GetFullList(int batchSize = 100, RecordListQueryParams? queryParams = null)
     {
         queryParams ??= new();
         var qParams = new
         Dictionary<string, string>()
         {
             {"page",queryParams.page.ToString()},
-            {"perPage",BatchSize.ToString()},
+            {"perPage",batchSize.ToString()},
             {"sort",queryParams.sort},
             {"filter",queryParams.filter},
             {"expand",queryParams.expand}
@@ -79,13 +79,13 @@ public class BaseService
     }
 
     /// <summary>
-    /// Gets Record response from PoccketBase
+    /// Gets Record response from PocketBase
     /// </summary>
     /// <typeparam name="T">collection objects Type</typeparam>
     /// <returns></returns>
-    public async Task<Record<T>> GetFullList<T>(int BatchSize = 100, RecordListQueryParams? queryParams = null) where T : PbBaseModel
+    public async Task<Record<T>> GetFullList<T>(int batchSize = 100, RecordListQueryParams? queryParams = null) where T : PbBaseModel
     {
-        var result = await GetFullList(BatchSize, queryParams);
+        var result = await GetFullList(batchSize, queryParams);
         if (string.IsNullOrWhiteSpace(result))
         {
             return new();
@@ -96,20 +96,20 @@ public class BaseService
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="Page"></param>
-    /// <param name="PerPage"></param>
+    /// <param name="page"></param>
+    /// <param name="perPage"></param>
     /// <param name="queryParams"></param>
     /// <returns></returns>
-    public async Task<string> GetList(int Page,
-        int PerPage,
+    public async Task<string> GetList(int page,
+        int perPage,
        ListQueryParams? queryParams = null)
     {
         queryParams ??= new();
         var qParams = new
          Dictionary<string, string>()
         {
-            {"page",Page.ToString()},
-            {"perPage",PerPage.ToString()},
+            {"page",page.ToString()},
+            {"perPage",perPage.ToString()},
             {"sort",queryParams.sort},
             {"filter",queryParams.filter}
         };
@@ -132,19 +132,19 @@ public class BaseService
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="Page"></param>
-    /// <param name="PerPage"></param>
+    /// <param name="page"></param>
+    /// <param name="perPage"></param>
     /// <param name="queryParams"></param>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
-    public async Task<Record<T>?> GetList<T>(int Page,
-       int PerPage,
+    public async Task<Record<T>?> GetList<T>(int page,
+       int perPage,
     ListQueryParams? queryParams = null) where T : PbBaseModel
     {
 
         try
         {
-            return Deserialize<Record<T>>(await GetList(Page, PerPage, queryParams)) ?? null;
+            return Deserialize<Record<T>>(await GetList(page, perPage, queryParams)) ?? null;
         }
         catch (Exception ex)
         {
@@ -276,10 +276,7 @@ public class BaseService
     /// <returns></returns>
     public async Task<bool> Delete(string id)
     {
-        var result = await _httpClient.DeleteAsync(urlBuilder.CollectionUrl(id));
+        var result = await HttpClient.DeleteAsync(UrlBuilder.CollectionUrl(id));
         return result.StatusCode == HttpStatusCode.OK;
     }
-
-
-
 }

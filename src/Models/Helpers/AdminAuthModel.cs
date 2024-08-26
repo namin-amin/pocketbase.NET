@@ -1,7 +1,8 @@
 ﻿namespace pocketbase.net.Models.Helpers;
+//TODO maybe convert all models to record?
 
 /// <summary>
-/// Authmodel representing user auth model
+/// AuthBaseModel representing user auth model
 /// </summary>
 public class RecordAuthModel : PbBaseModel
 {
@@ -11,5 +12,4 @@ public class RecordAuthModel : PbBaseModel
     public string username { get; set; } = "";
     public string email { get; set; } = "";
     public string name { get; set; } = "";
-
 }

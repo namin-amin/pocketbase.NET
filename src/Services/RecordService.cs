@@ -11,26 +11,26 @@ namespace pocketbase.net.Services;
 
 public class RecordService : BaseService
 {
-    internal IRealtimeServiceBase realtimeService { get; }
-    internal BaseAuthService<RecordAuthModel> baseAuthService { get; }
+    private IRealtimeServiceBase realtimeService { get; }
+    private BaseAuthService<RecordAuthModel> baseAuthService { get; }
 
-    public string baseCollectionPath
+    private string baseCollectionPath
     {
         get
         {
-            return $"api/collections/{Uri.EscapeDataString(collectionName)}";
+            return $"api/collections/{Uri.EscapeDataString(CollectionName)}";
         }
     }
 
     internal RecordService(
-       HttpClient _httpClient,
+       HttpClient httpClient,
        string collectionName,
        IRealtimeServiceBase realtimeService,
-       Pocketbase cleint
-   ) : base(_httpClient, collectionName, cleint)
+       Pocketbase client
+   ) : base(httpClient, collectionName, client)
     {
         this.realtimeService = realtimeService;
-        baseAuthService = new(_httpClient, collectionName, cleint);
+        baseAuthService = new(httpClient, collectionName, client);
     }
 
 
@@ -42,7 +42,7 @@ public class RecordService : BaseService
     /// <param name="callbackFun">Action to be called when there is alterations in the given topic collection</param>
     public void Subscribe(string topic, Action<RealtimeEventArgs> callbackFun)
     {
-        realtimeService.Subscribe(topic, callbackFun, collectionName);
+        realtimeService.Subscribe(topic, callbackFun, CollectionName);
     }
 
     /// <summary>
@@ -57,7 +57,7 @@ public class RecordService : BaseService
     {
         try
         {
-            return await _httpClient.GetStringAsync($"api/collections/{collectionName}/auth-methods");
+            return await HttpClient.GetStringAsync($"api/collections/{CollectionName}/auth-methods");
 
         }
         catch (Exception ex)
@@ -74,7 +74,7 @@ public class RecordService : BaseService
     {
         try
         {
-            return await baseAuthService.AuthWithPassword(email, password, collectionName);
+            return await baseAuthService.AuthWithPassword(email, password, CollectionName);
 
         }
         catch (Exception ex)
@@ -125,40 +125,31 @@ public class RecordService : BaseService
         query ??= new();
         query.Add("expand", expand);
 
-        string uri = $"{_httpClient.BaseAddress}{baseCollectionPath}/auth-with-oauth2";
+        var uri = $"{HttpClient.BaseAddress}{baseCollectionPath}/auth-with-oauth2";
 
         uri = UrlBuilderHelper.QueryBuilder(query, uri);
 
-        var response = await cleint.SendAsync(uri, HttpMethod.Post, new StringContent(Serialize(body, PbJsonOptions.options)), headers);
-        if (response.StatusCode == System.Net.HttpStatusCode.OK)
-        {
-            return await response.Content.ReadAsStringAsync();
-        }
-
-        return "";
+        var response = await Client.SendAsync(uri, HttpMethod.Post, new StringContent(Serialize(body, PbJsonOptions.options)), headers);
+        return response.StatusCode == System.Net.HttpStatusCode.OK ? await response.Content.ReadAsStringAsync() : "";
     }
 
     public async Task<bool> RequestVerification(string email)
     {
-        string uri = $"{baseCollectionPath}/request-verification";
+        var uri = $"{baseCollectionPath}/request-verification";
         var content = new Dictionary<string, string>
         {
             { "email", email }
         };
 
-        var strcontent = Serialize(content, PbJsonOptions.options);
+        var stringContent = Serialize(content, PbJsonOptions.options);
 
-        Console.WriteLine(strcontent);
+        Console.WriteLine(stringContent);
 
-        var response = await cleint.SendAsync(
+        var response = await Client.SendAsync(
             uri,
             HttpMethod.Post,
-            new StringContent(strcontent)
+            new StringContent(stringContent)
         );
-        if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
-        {
-            return true;
-        }
-        return false;
+        return response.StatusCode == System.Net.HttpStatusCode.NoContent;
     }
 }

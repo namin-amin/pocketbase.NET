@@ -1,6 +1,6 @@
 ﻿namespace pocketbase.net.Models.Helpers;
 
-///File contains error related models TODO not implemeneted
+///File contains error related models TODO not implemented
 /// 
 
 /// <summary>
