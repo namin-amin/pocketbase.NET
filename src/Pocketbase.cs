@@ -42,10 +42,10 @@ public class Pocketbase
     {
         this.httpClient = httpClient ?? new HttpClient();
         this.baseurl = baseurl.EndsWith("/") ? baseurl : baseurl + "/";
-        this.httpClient.BaseAddress = new Uri(baseurl);
+        this.httpClient.BaseAddress = new Uri(this.baseurl);
         this.lang = lang ?? "en-US";
-        realtimeService = new RealtimeService(this.httpClient, baseurl);
         authStore = new();
+        realtimeService = new RealtimeService(this.httpClient, baseurl, () => authStore.token);
         admins = new(this.httpClient, this);
         collection = new(this.httpClient, this);
     }
@@ -64,10 +64,10 @@ public class Pocketbase
     {
         this.httpClient = httpClient ?? new HttpClient();
         this.baseurl = baseurl.EndsWith("/") ? baseurl : baseurl + "/";
-        this.httpClient.BaseAddress = new Uri(baseurl);
+        this.httpClient.BaseAddress = new Uri(this.baseurl);
         this.lang = lang ?? "en-US";
-        this.realtimeService = realtimeService ?? new RealtimeService(this.httpClient, baseurl);
         authStore = new();
+        this.realtimeService = realtimeService ?? new RealtimeService(this.httpClient, baseurl, () => authStore.token);
         admins = new(this.httpClient, this);
         collection = new(this.httpClient, this);
     }
@@ -82,10 +82,10 @@ public class Pocketbase
     {
         this.httpClient = httpClient ?? new HttpClient();
         this.baseurl = baseurl.EndsWith("/") ? baseurl : baseurl + "/";
-        this.httpClient.BaseAddress = new Uri(baseurl);
+        this.httpClient.BaseAddress = new Uri(this.baseurl);
         this.lang = "en-US";
-        realtimeService = new RealtimeService(this.httpClient, baseurl);
         authStore = new();
+        realtimeService = new RealtimeService(this.httpClient, baseurl, () => authStore.token);
         admins = new(this.httpClient, this);
         collection = new(this.httpClient, this);
     }
@@ -127,15 +127,19 @@ public class Pocketbase
     {
         try
         {
+            var requestUri = Uri.TryCreate(url, UriKind.Absolute, out var absoluteUri)
+                ? absoluteUri
+                : new Uri(new Uri(baseurl), url.TrimStart('/'));
+
             var message = new HttpRequestMessage
             {
-                RequestUri = new Uri(baseurl!.ToString() + url),
+                RequestUri = requestUri,
                 Method = httpMethod,
             };
 
             if (content != null && httpMethod != HttpMethod.Get) message.Content = content;
             if (authStore.token != "")
-                message.Headers.Authorization = new AuthenticationHeaderValue(authStore.token);
+                message.Headers.TryAddWithoutValidation("Authorization", authStore.token);
 
             if (headers is null)
             {

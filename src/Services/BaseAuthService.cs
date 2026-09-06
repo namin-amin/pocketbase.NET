@@ -1,5 +1,6 @@
 ﻿using System.Net.Http;
 using System.Net.Http.Json;
+using System.Text.Json;
 using System.Threading.Tasks;
 using pocketbase.net.Helpers;
 using pocketbase.net.Models.Helpers;
@@ -33,53 +34,30 @@ public class BaseAuthService<T> : BaseService
         string url = ""
     )
     {
-        url = url == "" ? UrlBuilder.CollectionUrl() : UrlBuilder.CollectionUrl(overideColName: url);
-        url += "/auth-with-password";
+        var collection = url == "" ? CollectionName : url;
+        var endpoint = $"api/collections/{Uri.EscapeDataString(collection)}/auth-with-password";
+        var response = await Client.SendAsync(endpoint, HttpMethod.Post,
+            new StringContent(Serialize(new { identity = email, password }, PbJsonOptions.options)));
 
-        var response = await HttpClient.PostAsJsonAsync(
-          url, new
-          {
-              identity = email,
-              password
-          });
-
-        var data = await
-                    response.Content.ReadFromJsonAsync<IDictionary<string, object>>()
-                    ??
-                    new Dictionary<string, object>();
-
-        //object thing = null;
-
-        if (data.TryGetValue("token", out object? value))
-        {
-            Client.authStore.token = value?.ToString()!;
-            if (data.TryGetValue("admin", out object? admin))
-            {
-                try
-                {
-                    Client.authStore.model = Deserialize<T>(admin?.ToString() ?? "", PbJsonOptions.options) ?? new();
-                    return Client.authStore.model;
-                }
-                catch (Exception ex)
-                {
-
-                    Console.WriteLine(ex.Message);
-                }
-            }
-            if (data.TryGetValue("record", out object? record))
-            {
-                try
-                {
-                    Client.authStore.model = Deserialize<T>(record?.ToString() ?? "", PbJsonOptions.options) ?? new();
-                    return Client.authStore.model;
-                }
-                catch (Exception ex)
-                {
-
-                    Console.WriteLine(ex.Message);
-                }
-            }
+        if (!response.IsSuccessStatusCode)
             return new();
+
+        using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        var root = document.RootElement;
+        if (root.TryGetProperty("token", out var token))
+        {
+            Client.authStore.token = token.GetString() ?? string.Empty;
+            Client.authStore.MarkValid();
+            if (root.TryGetProperty("admin", out var admin))
+            {
+                Client.authStore.model = Deserialize<T>(admin.GetRawText(), PbJsonOptions.options) ?? new();
+                return Client.authStore.model;
+            }
+            if (root.TryGetProperty("record", out var record))
+            {
+                Client.authStore.model = Deserialize<T>(record.GetRawText(), PbJsonOptions.options) ?? new();
+                return Client.authStore.model;
+            }
         }
         return new();
     }
@@ -90,15 +68,22 @@ public class BaseAuthService<T> : BaseService
     /// <returns></returns>
     public async Task<RecordAuthModel> AuthRefresh()
     {
-        var data = await HttpClient.PostAsJsonAsync("admins", new
-        {
-            Authorization = Client.authStore.token
-        });
+        var endpoint = $"api/collections/{Uri.EscapeDataString(CollectionName)}/auth-refresh";
+        var data = await Client.SendAsync(endpoint, HttpMethod.Post);
 
 
-        if (data.StatusCode == System.Net.HttpStatusCode.OK)
+        if (data.IsSuccessStatusCode)
         {
-            return await data.Content.ReadFromJsonAsync<RecordAuthModel>(PbJsonOptions.options) ?? new();
+            using var document = JsonDocument.Parse(await data.Content.ReadAsStringAsync());
+            if (document.RootElement.TryGetProperty("token", out var token))
+                Client.authStore.token = token.GetString() ?? string.Empty;
+            if (document.RootElement.TryGetProperty("record", out var record))
+            {
+                var model = Deserialize<RecordAuthModel>(record.GetRawText(), PbJsonOptions.options) ?? new();
+                Client.authStore.model = model;
+                Client.authStore.MarkValid();
+                return model;
+            }
         }
         return new();
     }
@@ -135,14 +120,14 @@ public class BaseAuthService<T> : BaseService
         )
     {
 
-        var data = await HttpClient.PostAsJsonAsync("admins", new
+        var data = await Client.SendAsync($"api/collections/{Uri.EscapeDataString(CollectionName)}", HttpMethod.Post,
+            new StringContent(Serialize(new
         {
             email,
             password,
             passwordConfirm,
-            avatar,
-            Authorization = Client.authStore.token
-        });
+            avatar
+        }, PbJsonOptions.options)));
 
 
         if (data.StatusCode == System.Net.HttpStatusCode.OK)
@@ -155,13 +140,13 @@ public class BaseAuthService<T> : BaseService
 
     public async Task<bool> RequestPasswordReset(string email)
     {
-        var data = await HttpClient.PostAsJsonAsync("admins/request-password-reset", new
+        var data = await Client.SendAsync($"api/collections/{Uri.EscapeDataString(CollectionName)}/request-password-reset", HttpMethod.Post,
+            new StringContent(Serialize(new
         {
-            email,
-            Authorization = Client.authStore.token
-        });
+            email
+        }, PbJsonOptions.options)));
 
-        if (data.StatusCode == System.Net.HttpStatusCode.OK)
+        if (data.IsSuccessStatusCode)
         {
             return true;
         }
@@ -170,15 +155,15 @@ public class BaseAuthService<T> : BaseService
 
     public async Task<bool> ConfirmPasswordReset(string email, string password, string passwordConfirm)
     {
-        var data = await HttpClient.PostAsJsonAsync("admins/confirm-password-reset", new
+        var data = await Client.SendAsync($"api/collections/{Uri.EscapeDataString(CollectionName)}/confirm-password-reset", HttpMethod.Post,
+            new StringContent(Serialize(new
         {
             email,
             password,
-            passwordConfirm,
-            Authorization = Client.authStore.token
-        });
+            passwordConfirm
+        }, PbJsonOptions.options)));
 
-        if (data.StatusCode == System.Net.HttpStatusCode.OK)
+        if (data.IsSuccessStatusCode)
         {
             return true;
         }

@@ -26,13 +26,16 @@ public class BaseAuthStore
         }
     }
 
-    internal void Clear(Action<object, EventArgs>? callback = null)
+    public void Clear(Action<object, EventArgs>? callback = null)
     {
         _token = "";
+        _model = default!;
         isValid = false;
         //?How to format the eventargs?
         callback?.Invoke(this, EventArgs.Empty);
         Onchange?.Invoke(this, EventArgs.Empty);
     }
+
+    internal void MarkValid() => isValid = true;
 
 }

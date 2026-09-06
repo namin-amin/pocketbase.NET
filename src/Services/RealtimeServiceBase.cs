@@ -20,11 +20,13 @@ public abstract class RealtimeServiceBase : IRealtimeServiceBase
     public string _cleintId = "";
     public bool cancelled;
     public string baseUrl { get; set; }
+    private readonly Func<string> authTokenProvider;
 
-    public RealtimeServiceBase(HttpClient httpClient, string baseUrl)
+    public RealtimeServiceBase(HttpClient httpClient, string baseUrl, Func<string>? authTokenProvider = null)
     {
         this._httpcleint = httpClient;
         this.baseUrl = baseUrl;
+        this.authTokenProvider = authTokenProvider ?? (() => string.Empty);
         newLineChar = (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "\n" : Environment.NewLine);
     }
 
@@ -94,12 +96,16 @@ public abstract class RealtimeServiceBase : IRealtimeServiceBase
     /// <returns></returns>
     public async void AddRemoveTopics()
     {
-
-        await _httpcleint.PostAsJsonAsync(baseUrl + "/api/realtime", new
+        using var request = new HttpRequestMessage(HttpMethod.Post, baseUrl + "/api/realtime")
         {
-            clientId = _cleintId,
-            subscriptions = subscriptions.Keys.ToArray()
-        });
+            Content = JsonContent.Create(new
+            {
+                clientId = _cleintId,
+                subscriptions = subscriptions.Keys.ToArray()
+            })
+        };
+        AddAuthorization(request);
+        await _httpcleint.SendAsync(request);
     }
 
     public void ProcessCallBacks(RealtimeEventArgs args)
@@ -143,10 +149,8 @@ public abstract class RealtimeServiceBase : IRealtimeServiceBase
 
     public async Task ReadSSEStream(HttpRequestMessage request)
     {
-
-        using var client = new HttpClient();
-
-        var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+        AddAuthorization(request);
+        var response = await _httpcleint.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
         bool prevNewLine = false;
         var _responseContent = "";
 
@@ -162,7 +166,9 @@ public abstract class RealtimeServiceBase : IRealtimeServiceBase
 
                 if (stream.CanRead)
                 {
-                    await stream.ReadAsync(bytes);
+                    var bytesRead = await stream.ReadAsync(bytes);
+                    if (bytesRead == 0)
+                        break;
                     string? letter = Encoding.UTF8.GetString(bytes);
                     _responseContent += letter;
 
@@ -207,7 +213,13 @@ public abstract class RealtimeServiceBase : IRealtimeServiceBase
             await stream.DisposeAsync();
         }
 
-        client.CancelPendingRequests();
+    }
+
+    private void AddAuthorization(HttpRequestMessage request)
+    {
+        var token = authTokenProvider();
+        if (!string.IsNullOrWhiteSpace(token))
+            request.Headers.TryAddWithoutValidation("Authorization", token);
     }
 
     /// <summary>
@@ -219,11 +231,20 @@ public abstract class RealtimeServiceBase : IRealtimeServiceBase
         if (data == "")
             return;
 
-        var val = data.Split(newLineChar);
-        if (string.IsNullOrWhiteSpace(_cleintId)) _cleintId = val[0].Split(":")[1];
+        var lines = data.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+        var eventLine = lines.FirstOrDefault(line => line.StartsWith("event:", StringComparison.OrdinalIgnoreCase));
+        var dataLine = lines.FirstOrDefault(line => line.StartsWith("data:", StringComparison.OrdinalIgnoreCase));
+        if (dataLine is null)
+            return;
 
-        var _event = val[1].Split(":")[1];
-        var Data = val[2][(val[2].IndexOf(":", StringComparison.Ordinal) + 1)..];
+        var _event = eventLine?[(eventLine.IndexOf(':') + 1)..].Trim() ?? string.Empty;
+        var Data = dataLine[(dataLine.IndexOf(':') + 1)..].Trim();
+        if (_event == "PB_CONNECT")
+        {
+            using var connectDocument = JsonDocument.Parse(Data);
+            if (connectDocument.RootElement.TryGetProperty("clientId", out var clientId))
+                _cleintId = clientId.GetString() ?? string.Empty;
+        }
 
         var args = new RealtimeEventArgs()
         {
@@ -232,13 +253,13 @@ public abstract class RealtimeServiceBase : IRealtimeServiceBase
             data = Deserialize<Data>(Data) ?? new()
         };
 
-        if (!string.IsNullOrWhiteSpace(_event) && _event == "PB_CONNECT")
+        if (_event == "PB_CONNECT")
         {
             AddRemoveTopics();
         }
-        else
+        else if (subscriptions.TryGetValue(_event, out var callbacks))
         {
-            ProcessCallBacks(args);
+            callbacks.ForEach(callback => callback.Invoke(args));
         }
     }
 }

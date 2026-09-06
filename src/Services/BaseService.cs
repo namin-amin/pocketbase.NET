@@ -39,7 +39,7 @@ public class BaseService
             content = new StringContent(Serialize(requestParams.body, PbJsonOptions.options));
         }
 
-        var httpResult = await Client.SendAsync(UrlBuilder.CollectionUrl(id, requestParams.queryParams), HttpMethod.Get, content);
+        var httpResult = await Client.SendAsync(UrlBuilder.CollectionUrl(id, requestParams.queryParams), requestParams.method, content);
         return await httpResult.Content.ReadAsStringAsync();
     }
 
@@ -276,7 +276,7 @@ public class BaseService
     /// <returns></returns>
     public async Task<bool> Delete(string id)
     {
-        var result = await HttpClient.DeleteAsync(UrlBuilder.CollectionUrl(id));
+        var result = await Client.SendAsync(UrlBuilder.CollectionUrl(id), HttpMethod.Delete);
         return result.StatusCode == HttpStatusCode.OK;
     }
 }

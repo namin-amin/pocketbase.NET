@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
+      <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <AssemblyName>pocketbase.NET</AssemblyName>
@@ -28,13 +28,11 @@
     <SupportedPlatform Include="browser" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
-    <PackageReference Include="System.Text.Json" Version="8.0.4" />
+    <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <EditorConfigFiles Remove="D:\Projects\Pb\pocketbase.net\.editorconfig" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\LICENSE.md">
@@ -45,7 +43,6 @@
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
-    <None Include="D:\Projects\Pb\pocketbase.net\.editorconfig" />
   </ItemGroup>
 
 </Project>

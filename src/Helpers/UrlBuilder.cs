@@ -10,12 +10,8 @@ public class UrlBuilder
     public UrlBuilder(string collectionName)
     {
         this.collectionName = collectionName;
-        if (collectionName != "admins")
-        {
-
-            collectionType = "collections/";
-            recordType = "/records/";
-        }
+        collectionType = "collections/";
+        recordType = "/records/";
         if (collectionName == string.Empty)
         {
             this.recordType = "";
@@ -59,9 +55,9 @@ public static class UrlBuilderHelper
         if (queryParams is null) return baseUrl;
 
         var queryDict = queryParams
-            ?.Where(c => c.Value?.ToString() != string.Empty)
-            .ToDictionary(s => s.Key.ToString(), s => s.Value.ToString()) 
-                        ?? new Dictionary<string, string>();
+            ?.Where(c => !string.IsNullOrEmpty(c.Value))
+            .ToDictionary(s => s.Key, s => (string?)s.Value)
+                        ?? new Dictionary<string, string?>();
 
         return QueryHelpers.AddQueryString(baseUrl.EndsWith("/") == false ? baseUrl : baseUrl[..^1], queryDict);
     }
