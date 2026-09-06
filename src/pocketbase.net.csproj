@@ -4,11 +4,14 @@
       <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+    <IncludeSymbols>True</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <DebugType>portable</DebugType>
     <AssemblyName>pocketbase.NET</AssemblyName>
     <RootNamespace>pocketbase.net</RootNamespace>
     <PackageTags>Cleint for pocktbase ; Blazorwebassembly support with realtime communications;</PackageTags>
     <Title>Pocketbase SDK for dotnet </Title>
-    <Version>0.01.2</Version>
+    <Version>0.2.0-beta.1</Version>
     <Authors>namin-amin</Authors>
     <Company>-</Company>
     <Description>Pocketbase SDK for dotnet ,SDK designed inline with pocketbase js sdk</Description>
